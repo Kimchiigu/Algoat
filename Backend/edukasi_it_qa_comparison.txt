@@ -1,0 +1,3 @@
+Apa itu algoritma? \t Algoritma adalah langkah-langkah logis untuk menyelesaikan masalah. \t Algoritma adalah prosedur langkah demi langkah untuk menyelesaikan masalah. \t 1
+Jelaskan OOP. \t OOP adalah pemrograman berorientasi objek. \t OOP adalah paradigma pemrograman yang menggunakan "objek" dan data. \t 1
+Apa itu database? \t Database adalah sistem untuk mengelola data. \t Database adalah tempat penyimpanan data secara terstruktur. \t 1
