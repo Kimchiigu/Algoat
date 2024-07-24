@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -84,6 +83,12 @@ export default function LoginForm() {
             )}
           />
           <Button type="submit">Login</Button>
+          <p className="mt-4 text-sm text-center">
+            Don't have an account?{" "}
+            <a href="/register" className="text-blue-600 hover:underline">
+              Register
+            </a>
+          </p>
         </div>
       </form>
     </Form>
