@@ -62,9 +62,9 @@ export default function RegisterForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full min-h-screen space-y-6 flex flex-col items-center justify-center"
+        className="w-full min-h-screen space-y-6 flex flex-col items-center justify-center bg-gradient-to-r from-stone-500 via-indigo-600 to-stone-700"
       >
-        <div className="flex flex-col rounded-md py-16 px-12 shadow-xl">
+        <div className="flex flex-col rounded-md py-16 px-12 shadow-xl bg-white">
           <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight first:mt-0">
             Register with Algoaters!
           </h2>
