@@ -1,0 +1,6 @@
+problem_description,correct_answers
+How to fix a '404 Not Found' error?,Check if the URL is correct or if the page has been moved.|Ensure the server is running and the path is correct.|Clear the browser cache and refresh.
+How to recover a lost password on Windows?,Use the password reset feature on the login screen.|Follow the steps provided in the recovery email.|Use the Windows security questions if set up.
+How to install Python on Linux?,"Use the package manager to install Python, e.g., `sudo apt-get install python3`.|Download and install from the official Python website.|Use `conda install python` if using Anaconda."
+How to set up a virtual environment in Python?,Use `venv` or `virtualenv` to create an isolated environment.|Run `python -m venv myenv` to set up the environment.|Activate the environment with `source myenv/bin/activate`.
+How to resolve a 'Connection refused' error in a web server?,Check if the web server is running and if the firewall settings are correct.|Verify that the server is listening on the correct port.|Check server logs for errors.
