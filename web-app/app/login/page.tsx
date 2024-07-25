@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import * as THREE from "three"; // Importing three.js
-import HALO from "vanta/dist/vanta.halo.min"; // Importing Vanta.js Halo effect
-
+import Particles from "react-tsparticles";
+import type { Engine } from "tsparticles-engine";
+import { loadStarsPreset } from "tsparticles-preset-stars";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { useCallback } from "react";
 
 const LoginSchema = z.object({
   username: z.string().min(2, {
@@ -37,23 +37,6 @@ export default function LoginForm() {
     },
   });
 
-  const vantaRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const vantaEffect = HALO({
-      el: vantaRef.current!,
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.0,
-      minWidth: 200.0,
-      THREE,
-    });
-
-    return () => {
-      if (vantaEffect) vantaEffect.destroy();
-    };
-  }, []);
-
   function onSubmit(data: z.infer<typeof LoginSchema>) {
     toast({
       title: "You submitted the following values:",
@@ -65,18 +48,39 @@ export default function LoginForm() {
     });
   }
 
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadStarsPreset(engine);
+  }, []);
+
+  const particlesOptions = {
+    preset: "stars",
+    background: {
+      color: {
+        value: "#000",
+      },
+    },
+    particles: {
+      move: {
+        speed: 1,
+      },
+    },
+  };
+
   return (
-    <div
-      ref={vantaRef}
-      className="w-full min-h-screen flex flex-col items-center justify-center"
-    >
+    <div className="w-full min-h-screen flex flex-col items-center justify-center">
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full min-h-screen space-y-6 flex flex-col items-center justify-center"
+          className="w-full min-h-screen flex flex-col items-center justify-center p-4"
         >
           <div
-            className="flex flex-col rounded-md py-16 px-12 shadow-xl bg-white bg-opacity-50"
+            className="flex flex-col rounded-md py-16 px-12 shadow-xl"
             style={{
               backdropFilter: "blur(16px)",
               backgroundColor: "rgba(255, 255, 255, 0.25)",
@@ -85,7 +89,7 @@ export default function LoginForm() {
               border: "1px solid rgba(255, 255, 255, 0.18)",
             }}
           >
-            <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight first:mt-0 text-gray-100">
+            <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight text-primary-foreground">
               Login Algoaters!
             </h2>
 
@@ -94,18 +98,14 @@ export default function LoginForm() {
               name="username"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel className="text-primary-foreground">
+                    Username
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Username"
                       {...field}
-                      style={{
-                        backdropFilter: "blur(16px)",
-                        backgroundColor: "rgba(255, 255, 255, 0.25)",
-                        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(255, 255, 255, 0.18)",
-                      }}
+                      className="bg-card text-card-foreground placeholder:text-muted-foreground"
                     />
                   </FormControl>
                   <FormMessage />
@@ -117,29 +117,27 @@ export default function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-primary-foreground">
+                    Password
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="password"
                       placeholder="Password"
                       {...field}
-                      style={{
-                        backdropFilter: "blur(16px)",
-                        backgroundColor: "rgba(255, 255, 255, 0.25)",
-                        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(255, 255, 255, 0.18)",
-                      }}
+                      className="bg-card text-card-foreground placeholder:text-muted-foreground"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Login</Button>
-            <p className="mt-4 text-sm text-center">
+            <Button className="bg-primary text-primary-foreground">
+              Login
+            </Button>
+            <p className="mt-4 text-sm text-center text-primary-foreground">
               Don't have an account?{" "}
-              <a href="/register" className="text-gray-100 hover:underline">
+              <a href="/register" className="hover:underline text-accent">
                 Register
               </a>
             </p>

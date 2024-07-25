@@ -8,23 +8,7 @@ import Typewriter from "typewriter-effect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import PlayDialog from "./dialog-play";
 
 export default function Home() {
   const greetings = [
@@ -49,6 +33,11 @@ export default function Home() {
     background: {
       color: {
         value: "#000",
+      },
+    },
+    particles: {
+      move: {
+        speed: 1,
       },
     },
   };
@@ -85,79 +74,7 @@ export default function Home() {
         {/* Body */}
         <div className="flex flex-row items-center justify-center w-full h-full">
           <div className="flex flex-col items-center w-1/2 space-y-4 text-2xl">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="w-1/2 p-10 text-3xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800">
-                  Play
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <Tabs defaultValue="account" className="w-full mt-7">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="account">Create Room</TabsTrigger>
-                    <TabsTrigger value="password">Join Room</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="account">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Create Room</CardTitle>
-                        <CardDescription>
-                          Host a Room by creating a Room ID so your friends can
-                          hop on!
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="name">Room Name</Label>
-                          <Input id="name" placeholder="Input room name" />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="username">Room ID</Label>
-                          <Input id="username" placeholder="Input room ID" />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="username">Room Password</Label>
-                          <Input
-                            id="username"
-                            placeholder="Input room password"
-                            type="password"
-                          />
-                        </div>
-                      </CardContent>
-                      <CardFooter>
-                        <Button>Create Room</Button>
-                      </CardFooter>
-                    </Card>
-                  </TabsContent>
-                  <TabsContent value="password">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Join Room</CardTitle>
-                        <CardDescription>
-                          Enter Room ID to Join the Room
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="current">Room ID</Label>
-                          <Input
-                            id="current"
-                            type="text"
-                            placeholder="Input room ID"
-                          />
-                        </div>
-                      </CardContent>
-                      <CardFooter>
-                        <Button>Join Room</Button>
-                      </CardFooter>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-                {/* <DialogClose asChild>
-                  <Button className="mt-4">Close</Button>
-                </DialogClose> */}
-              </DialogContent>
-            </Dialog>
+            <PlayDialog></PlayDialog>
             <Button className="w-1/2 p-8 text-3xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800">
               Learn
             </Button>

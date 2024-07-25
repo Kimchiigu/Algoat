@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import * as THREE from "three"; // Importing three.js
-import HALO from "vanta/dist/vanta.halo.min"; // Importing Vanta.js Halo effect
-
 import { Button } from "@/components/ui/button";
+import Particles from "react-tsparticles";
+import type { Engine } from "tsparticles-engine";
+import { loadStarsPreset } from "tsparticles-preset-stars";
 import {
   Form,
   FormControl,
@@ -18,26 +17,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { useCallback } from "react";
 
-const RegisterSchema = z.object({
-  email: z.string().email({
-    message: "Invalid email address.",
-  }),
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-  confirmPassword: z
-    .string()
-    .min(6, {
-      message: "Confirm password must be at least 6 characters.",
-    })
-    .refine((val, ctx) => val === ctx.parent.password, {
-      message: "Passwords don't match.",
+const RegisterSchema = z
+  .object({
+    email: z.string().email({
+      message: "Invalid email address.",
     }),
-});
+    username: z.string().min(2, {
+      message: "Username must be at least 2 characters.",
+    }),
+    password: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "Confirm password must be at least 6 characters.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"],
+  });
 
 export default function RegisterForm() {
   const form = useForm<z.infer<typeof RegisterSchema>>({
@@ -50,23 +50,6 @@ export default function RegisterForm() {
     },
   });
 
-  const vantaRef = useRef(null);
-  useEffect(() => {
-    const vantaEffect = HALO({
-      el: vantaRef.current,
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.0,
-      minWidth: 200.0,
-      THREE,
-    });
-
-    return () => {
-      if (vantaEffect) vantaEffect.destroy();
-    };
-  }, []);
-
   function onSubmit(data: z.infer<typeof RegisterSchema>) {
     toast({
       title: "You submitted the following values:",
@@ -78,27 +61,47 @@ export default function RegisterForm() {
     });
   }
 
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadStarsPreset(engine);
+  }, []);
+
+  const particlesOptions = {
+    preset: "stars",
+    background: {
+      color: {
+        value: "#000",
+      },
+    },
+    particles: {
+      move: {
+        speed: 1,
+      },
+    },
+  };
+
   return (
-    <div
-      ref={vantaRef}
-      className="w-full min-h-screen flex flex-col items-center justify-center"
-    >
+    <div className="w-full min-h-screen flex flex-col items-center justify-center">
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full min-h-screen space-y-6 flex flex-col items-center justify-center"
+          className="w-full min-h-screen flex flex-col items-center justify-center p-4"
         >
           <div
-            className="flex flex-col rounded-md py-16 px-12 shadow-xl bg-white bg-opacity-50"
+            className="flex flex-col rounded-md py-16 px-12 shadow-xl"
             style={{
-              backdropFilter: "blur(10px)",
+              backdropFilter: "blur(16px)",
               backgroundColor: "rgba(255, 255, 255, 0.25)",
               boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
               borderRadius: "16px",
               border: "1px solid rgba(255, 255, 255, 0.18)",
             }}
           >
-            <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight first:mt-0">
+            <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight text-primary-foreground">
               Register with Algoaters!
             </h2>
 
@@ -107,9 +110,16 @@ export default function RegisterForm() {
               name="email"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-primary-foreground">
+                    Email
+                  </FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Email" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      {...field}
+                      className="bg-card text-card-foreground placeholder:text-muted-foreground"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,9 +130,15 @@ export default function RegisterForm() {
               name="username"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel className="text-primary-foreground">
+                    Username
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Username" {...field} />
+                    <Input
+                      placeholder="Username"
+                      {...field}
+                      className="bg-card text-card-foreground placeholder:text-muted-foreground"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,9 +149,16 @@ export default function RegisterForm() {
               name="password"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-primary-foreground">
+                    Password
+                  </FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      {...field}
+                      className="bg-card text-card-foreground placeholder:text-muted-foreground"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,22 +169,30 @@ export default function RegisterForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel className="text-primary-foreground">
+                    Confirm Password
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="password"
                       placeholder="Confirm Password"
                       {...field}
+                      className="bg-card text-card-foreground placeholder:text-muted-foreground"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Register</Button>
-            <p className="mt-4 text-sm text-center">
+            <Button
+              type="submit"
+              className="bg-primary text-primary-foreground"
+            >
+              Register
+            </Button>
+            <p className="mt-4 text-sm text-center text-primary-foreground">
               Already have an account?{" "}
-              <a href="/login" className="text-blue-600 hover:underline">
+              <a href="/login" className="text-accent hover:underline">
                 Login
               </a>
             </p>
