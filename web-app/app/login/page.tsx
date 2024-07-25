@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
@@ -18,35 +19,42 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useCallback } from "react";
+import { handleLogin } from "@/controller/user-controller";
+import withAuth from "@/hoc/withAuth";
 
 const LoginSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  email: z.string().min(1, {
+    message: "Email cannot be empty",
   }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+  password: z.string().min(1, {
+    message: "Password cannot be empty",
   }),
 });
 
-export default function LoginForm() {
+function LoginPage() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof LoginSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
+  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+    try {
+      await handleLogin(data.email, data.password);
+      router.push("/home");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+
+      toast({
+        title: "Login failed",
+        description: errorMessage,
+      });
+    }
+  };
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
@@ -95,15 +103,15 @@ export default function LoginForm() {
 
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem className="mb-5">
                   <FormLabel className="text-primary-foreground">
-                    Username
+                    Email
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Username"
+                      placeholder="Email"
                       {...field}
                       className="bg-card text-card-foreground placeholder:text-muted-foreground"
                     />
@@ -147,3 +155,5 @@ export default function LoginForm() {
     </div>
   );
 }
+
+export default withAuth(LoginPage, false);
