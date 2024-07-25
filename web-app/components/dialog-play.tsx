@@ -23,7 +23,7 @@ export default function PlayDialog() {
     >
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="w-1/2 p-8 text-3xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800">
+          <Button className="w-1/3 py-10 text-5xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800 transform transition-transform duration-300 ease-in-out hover:scale-125 font-consolas">
             Play
           </Button>
         </DialogTrigger>
