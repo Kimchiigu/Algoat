@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
@@ -8,9 +8,15 @@ import Typewriter from "typewriter-effect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
-import PlayDialog from "./dialog-play";
+import PlayDialog from "../../components/dialog-play";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebase";
+import { useUserStore } from "@/lib/userStore";
+import withAuth from "@/hoc/withAuth";
 
-export default function Home() {
+function HomePage() {
+  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
+
   const greetings = [
     "Hello!",
     "Hola!",
@@ -41,6 +47,28 @@ export default function Home() {
       },
     },
   };
+
+  useEffect(() => {
+    const unSub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserInfo(user.uid);
+      }
+    });
+
+    return () => {
+      unSub();
+    };
+  }, [fetchUserInfo]);
+
+  if (isLoading) {
+    return (
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
+    );
+  }
 
   return (
     <div className="relative w-full min-h-screen">
@@ -113,3 +141,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default withAuth(HomePage, true);
