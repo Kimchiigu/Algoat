@@ -14,6 +14,7 @@ import { auth } from "@/firebase";
 import { useUserStore } from "@/lib/userStore";
 import withAuth from "@/hoc/withAuth";
 import { handleLogout } from "@/controller/user-controller";
+import Link from "next/link";
 
 function HomePage() {
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
@@ -104,12 +105,22 @@ function HomePage() {
         <div className="flex flex-row items-center justify-center w-full h-full">
           <div className="flex flex-col items-center w-1/2 gap-8 text-2xl">
             <PlayDialog></PlayDialog>
-            <Button className="w-1/3 py-10 text-5xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800 transform transition-transform duration-300 ease-in-out hover:scale-125 font-consolas">
-              Learn
-            </Button>
-            <Button className="w-1/3 py-10 text-5xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800 transform transition-transform duration-300 ease-in-out hover:scale-125 font-consolas">
-              Forum
-            </Button>
+            <Link
+              href="/learning"
+              className="w-full flex flex-row items-center justify-center"
+            >
+              <Button className="w-1/3 py-10 text-5xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800 transform transition-transform duration-300 ease-in-out hover:scale-125 font-consolas">
+                Learn
+              </Button>
+            </Link>
+            <Link
+              href="/forum"
+              className="w-full flex flex-row items-center justify-center"
+            >
+              <Button className="w-1/3 py-10 text-5xl bg-gradient-to-r from-violet-200 to-pink-200 text-gray-800 transform transition-transform duration-300 ease-in-out hover:scale-125 font-consolas">
+                Forum
+              </Button>
+            </Link>
           </div>
           <div className="w-1/2 flex items-center justify-center relative">
             <img
