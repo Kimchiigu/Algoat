@@ -23,11 +23,11 @@ import { handleLogin } from "@/controller/user-controller";
 import withAuth from "@/hoc/withAuth";
 
 const LoginSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  email: z.string().min(1, {
+    message: "Email cannot be empty",
   }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+  password: z.string().min(1, {
+    message: "Password cannot be empty",
   }),
 });
 
@@ -36,14 +36,14 @@ function LoginPage() {
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
   const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
     try {
-      await handleLogin(data.username, data.password);
+      await handleLogin(data.email, data.password);
       router.push("/home");
     } catch (error) {
       const errorMessage =
@@ -103,15 +103,15 @@ function LoginPage() {
 
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem className="mb-5">
                   <FormLabel className="text-primary-foreground">
-                    Username
+                    Email
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Username"
+                      placeholder="Email"
                       {...field}
                       className="bg-card text-card-foreground placeholder:text-muted-foreground"
                     />

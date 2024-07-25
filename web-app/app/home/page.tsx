@@ -13,6 +13,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
 import { useUserStore } from "@/lib/userStore";
 import withAuth from "@/hoc/withAuth";
+import { handleLogout } from "@/controller/user-controller";
 
 function HomePage() {
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
@@ -121,17 +122,18 @@ function HomePage() {
 
         {/* Footer */}
         <div className="flex justify-between items-center w-full p-4 absolute bottom-0">
-          <div className="flex row">
-            <FontAwesomeIcon
-              icon={faCog}
-              size="2x"
-              className="text-white ml-5"
-            />
-            <FontAwesomeIcon
-              icon={faSignOutAlt}
-              size="2x"
-              className="text-red-600 ml-5"
-            />
+          <div className="flex row justify-center items-center">
+            <Button variant="ghost" className="p-8">
+              <FontAwesomeIcon icon={faCog} size="2x" className="text-white" />
+            </Button>
+
+            <Button onClick={handleLogout} variant="ghost" className="p-8">
+              <FontAwesomeIcon
+                icon={faSignOutAlt}
+                size="2x"
+                className="text-red-600"
+              />
+            </Button>
           </div>
           <p className="font-bold mr-5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
             ©Algoat 2024

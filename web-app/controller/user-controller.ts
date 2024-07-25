@@ -37,3 +37,11 @@ export const handleRegister = async (
     console.error("Register failed", error);
   }
 };
+
+export const handleLogout = async () => {
+  try {
+    await auth.signOut();
+  } catch (error) {
+    console.error("Register failed", error);
+  }
+};
