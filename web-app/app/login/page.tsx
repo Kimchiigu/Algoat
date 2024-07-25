@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
@@ -18,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useCallback } from "react";
+import { handleLogin } from "@/controller/user-controller";
+import withAuth from "@/hoc/withAuth";
 
 const LoginSchema = z.object({
   username: z.string().min(2, {
@@ -28,7 +31,8 @@ const LoginSchema = z.object({
   }),
 });
 
-export default function LoginForm() {
+function LoginPage() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -37,16 +41,20 @@ export default function LoginForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof LoginSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
+  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+    try {
+      await handleLogin(data.username, data.password);
+      router.push("/home");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+
+      toast({
+        title: "Login failed",
+        description: errorMessage,
+      });
+    }
+  };
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
@@ -147,3 +155,5 @@ export default function LoginForm() {
     </div>
   );
 }
+
+export default withAuth(LoginPage, false);

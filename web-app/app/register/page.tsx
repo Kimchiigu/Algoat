@@ -18,6 +18,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useCallback } from "react";
+import { handleRegister } from "@/controller/user-controller";
+import { useRouter } from "next/navigation";
+import withAuth from "@/hoc/withAuth";
 
 const RegisterSchema = z
   .object({
@@ -39,7 +42,8 @@ const RegisterSchema = z
     path: ["confirmPassword"],
   });
 
-export default function RegisterForm() {
+function RegisterPage() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -50,16 +54,20 @@ export default function RegisterForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof RegisterSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
+  const onSubmit = async (data: z.infer<typeof RegisterSchema>) => {
+    try {
+      await handleRegister(data.email, data.password, data.username);
+      router.push("/home");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+
+      toast({
+        title: "Register failed",
+        description: errorMessage,
+      });
+    }
+  };
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
@@ -202,3 +210,5 @@ export default function RegisterForm() {
     </div>
   );
 }
+
+export default withAuth(RegisterPage, false);
