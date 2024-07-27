@@ -1,7 +1,9 @@
+import ConstellationProgress from "../material/constellation";
+
 export default function PracticePage() {
   return (
     <div className="flex flex-col">
-      <h1>Ini Practice</h1>
+      <ConstellationProgress />
     </div>
   );
 }
