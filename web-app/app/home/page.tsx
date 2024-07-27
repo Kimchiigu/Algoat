@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/button";
 import PlayDialog from "../../components/dialog-play";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
-import { useUserStore } from "@/lib/userStore";
 import withAuth from "@/hoc/withAuth";
 import { handleLogout } from "@/controller/user-controller";
 import Link from "next/link";
+import useUserStore from "@/lib/user-store";
 
 function HomePage() {
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();

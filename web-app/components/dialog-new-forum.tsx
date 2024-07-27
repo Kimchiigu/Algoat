@@ -13,8 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "next-themes";
 import { Textarea } from "./ui/textarea";
+import { LinkIcon } from "lucide-react";
+import { handleFile } from "@/controller/forum-controller";
+import { useState } from "react";
+import { FileState } from "./model/file-state-model";
+import ImagePreview from "./preview-image";
 
 export default function NewForumDialog() {
+  const [file, setFile] = useState<FileState | null>(null);
   return (
     <ThemeProvider
       attribute="class"
@@ -58,7 +64,23 @@ export default function NewForumDialog() {
                 className="resize-none overflow-y-scrolls h-48"
               />
             </div>
+            <div className="justify-self-start">
+              <Label htmlFor="file">
+                <Button variant="ghost" className="w-1/5">
+                  <LinkIcon></LinkIcon>
+                </Button>
+              </Label>
+              <Input
+                type="file"
+                id="file"
+                className="hidden"
+                onChange={(e) => handleFile(e, setFile)}
+              ></Input>
+            </div>
           </div>
+          {file && file.url && file.type.startsWith("image/") && (
+            <ImagePreview file={file} setFile={setFile}></ImagePreview>
+          )}
           <DialogFooter className="">
             <DialogClose asChild>
               <Button type="button" variant="secondary">

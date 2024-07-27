@@ -1,12 +1,14 @@
+import { UserStoreState } from "@/components/model/user-store-state-model";
+import { User } from "@/components/model/user-model";
 import { db } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { create } from "zustand";
 
-export const useUserStore = create((set) => ({
+const useUserStore = create<UserStoreState>((set) => ({
   currentUser: null,
   isLoading: true,
 
-  fetchUserInfo: async (id) => {
+  fetchUserInfo: async (id: string) => {
     if (!id) return set({ currentUser: null, isLoading: true });
 
     try {
@@ -14,7 +16,7 @@ export const useUserStore = create((set) => ({
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        set({ currentUser: docSnap.data(), isLoading: false });
+        set({ currentUser: docSnap.data() as User, isLoading: false });
       } else {
         set({ currentUser: null, isLoading: true });
       }
@@ -23,6 +25,10 @@ export const useUserStore = create((set) => ({
       set({ currentUser: null, isLoading: true });
     }
   },
-  updateCurrentUser: (userData) =>
-    set((state) => ({ currentUser: { ...state.currentUser, ...userData } })),
+  updateCurrentUser: (userData: Partial<User>) =>
+    set((state) => ({
+      currentUser: { ...state.currentUser, ...userData } as User,
+    })),
 }));
+
+export default useUserStore;
