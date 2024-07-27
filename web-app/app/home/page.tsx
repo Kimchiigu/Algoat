@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import PlayDialog from "../../components/dialog-play";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
+import useUserStore from "@/lib/user-store";
 import withAuth from "@/hoc/withAuth";
 import { handleLogout } from "@/controller/user-controller";
 import Link from "next/link";
@@ -26,12 +27,12 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { useVolume } from "@/lib/VolumeContext";
 import BackgroundAudio from "@/components/background-audio";
-import useUserStore from "@/lib/user-store";
 
 function HomePage() {
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
-  const [volume, setVolume] = useState(50); // Default volume level
+  const { volume, setVolume } = useVolume(); // Use Volume Context
 
   const greetings = [
     "Hello!",
@@ -96,7 +97,7 @@ function HomePage() {
   return (
     <div className="relative w-full min-h-screen">
       {/* Background Audio */}
-      <BackgroundAudio volume={volume} />
+      <BackgroundAudio />
 
       {/* Particles Background */}
       <Particles

@@ -1,9 +1,11 @@
+// components/BackgroundAudio.tsx
 "use client";
 
-// components/BackgroundAudio.js
 import { useEffect, useRef } from "react";
+import { useVolume } from "@/lib/VolumeContext";
 
-const BackgroundAudio = ({ volume }: { volume: number }) => {
+const BackgroundAudio = () => {
+  const { volume } = useVolume();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
