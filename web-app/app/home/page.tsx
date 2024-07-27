@@ -8,8 +8,6 @@ import Typewriter from "typewriter-effect";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import PlayDialog from "../../components/dialog-play";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebase";
 import useUserStore from "@/lib/user-store";
 import withAuth from "@/hoc/withAuth";
 import { handleLogout } from "@/controller/user-controller";
@@ -31,8 +29,8 @@ import { useVolume } from "@/lib/VolumeContext";
 import BackgroundAudio from "@/components/background-audio";
 
 function HomePage() {
-  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
-  const { volume, setVolume } = useVolume(); // Use Volume Context
+  const { isLoading, fetchUserInfo } = useUserStore();
+  const { volume, setVolume } = useVolume();
 
   const greetings = [
     "Hello!",
@@ -64,18 +62,6 @@ function HomePage() {
       },
     },
   };
-
-  useEffect(() => {
-    const unSub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchUserInfo(user.uid);
-      }
-    });
-
-    return () => {
-      unSub();
-    };
-  }, [fetchUserInfo]);
 
   if (isLoading) {
     return (
