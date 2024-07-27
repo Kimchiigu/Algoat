@@ -10,8 +10,12 @@ import { useCallback } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
+import { useForumsAndUsers } from "@/hooks/forums-hooks";
+import { Button } from "@/components/ui/button";
 
 export default function ForumPage() {
+  const { forums, users } = useForumsAndUsers();
+
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
   }, []);
@@ -29,6 +33,7 @@ export default function ForumPage() {
       },
     },
   };
+
   return (
     <ThemeProvider
       attribute="class"
@@ -47,9 +52,13 @@ export default function ForumPage() {
           <GoBack href="/home"></GoBack>
           <div className="flex flex-row items-center justify-center mt-4">
             <Input
-              className="w-1/2 bg-gray-600 p-6"
+              className="w-1/2 p-6 bg-gray-700 text-white placeholder-gray-400 rounded-lg shadow-lg"
               placeholder="Search discussion"
-            ></Input>
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.25)",
+                backdropFilter: "blur(16px)",
+              }}
+            />
             <NewForumDialog></NewForumDialog>
           </div>
           <div
@@ -62,13 +71,22 @@ export default function ForumPage() {
               border: "1px solid rgba(255, 255, 255, 0.18)",
             }}
           >
-            <ScrollArea className="h-full p-4">
-              <Forum
-                username="David"
-                title="Cara Menjadi David"
-                content="Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David. Berikut adalah cara menjadi David."
-                createdAt="07/27/2024"
-              ></Forum>
+            <ScrollArea className="h-full p-8 flex flex-col">
+              {forums.map((forum) => (
+                <div className="border rounded-lg mb-8">
+                  <Forum
+                    key={forum.id}
+                    username={users[forum.senderId] || "Unknown"}
+                    title={forum.title}
+                    content={forum.contents}
+                    createdAt={forum.createdAt}
+                    file={forum.file}
+                    fileName={forum.fileName}
+                    fileType={forum.fileType}
+                  />
+                  <Button className="ml-8 mb-8">See more</Button>
+                </div>
+              ))}
             </ScrollArea>
           </div>
         </div>
