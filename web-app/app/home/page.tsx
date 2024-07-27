@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import Typewriter from "typewriter-effect";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import PlayDialog from "../../components/dialog-play";
 import { onAuthStateChanged } from "firebase/auth";
@@ -15,9 +14,24 @@ import { useUserStore } from "@/lib/userStore";
 import withAuth from "@/hoc/withAuth";
 import { handleLogout } from "@/controller/user-controller";
 import Link from "next/link";
+import {
+  LogOut,
+  Settings,
+  Volume,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import BackgroundAudio from "@/components/background-audio";
 
 function HomePage() {
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
+  const [volume, setVolume] = useState(50); // Default volume level
 
   const greetings = [
     "Hello!",
@@ -72,8 +86,18 @@ function HomePage() {
     );
   }
 
+  const getVolumeIcon = () => {
+    if (volume === 0) return <VolumeX />;
+    if (volume < 30) return <Volume />;
+    if (volume >= 30 && volume < 70) return <Volume1 />;
+    return <Volume2 />;
+  };
+
   return (
     <div className="relative w-full min-h-screen">
+      {/* Background Audio */}
+      <BackgroundAudio volume={volume} />
+
       {/* Particles Background */}
       <Particles
         id="tsparticles"
@@ -135,15 +159,27 @@ function HomePage() {
         <div className="flex justify-between items-center w-full p-4 absolute bottom-0">
           <div className="flex row justify-center items-center">
             <Button variant="ghost" className="p-8">
-              <FontAwesomeIcon icon={faCog} size="2x" className="text-white" />
+              <Settings />
             </Button>
 
+            <HoverCard>
+              <HoverCardTrigger>
+                <Button variant="ghost" className="p-8">
+                  {getVolumeIcon()}
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent>
+                <Slider
+                  value={[volume]}
+                  onValueChange={(value) => setVolume(value[0])}
+                  max={100}
+                  step={1}
+                />
+              </HoverCardContent>
+            </HoverCard>
+
             <Button onClick={handleLogout} variant="ghost" className="p-8">
-              <FontAwesomeIcon
-                icon={faSignOutAlt}
-                size="2x"
-                className="text-red-600"
-              />
+              <LogOut className="text-red-500" />
             </Button>
           </div>
           <p className="font-bold mr-5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
