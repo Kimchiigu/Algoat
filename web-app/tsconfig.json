@@ -26,8 +26,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "lib/userStore.js",
-    "lib/userStore.js"
+    "lib/user-store.js",
+    "controller/user-controller.ts",
+    "controller/forum-controller.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -3,7 +3,6 @@
 import NewForumDialog from "@/components/dialog-new-forum";
 import Forum from "@/components/forum";
 import GoBack from "@/components/go-back";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemeProvider } from "next-themes";

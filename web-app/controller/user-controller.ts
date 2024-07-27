@@ -20,7 +20,7 @@ export const handleRegister = async (
   email: string,
   password: string,
   username: string
-) => {
+): Promise<void> => {
   try {
     await createUserWithEmailAndPassword(auth, email, password);
     const user = auth.currentUser;
@@ -38,10 +38,10 @@ export const handleRegister = async (
   }
 };
 
-export const handleLogout = async () => {
+export const handleLogout = async (): Promise<void> => {
   try {
     await auth.signOut();
   } catch (error) {
-    console.error("Register failed", error);
+    console.error("Logout failed", error);
   }
 };
