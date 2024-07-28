@@ -34,6 +34,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <link rel="icon" href="/logo_light.png" sizes="any" />
       <body className={inter.className}>
         <VolumeProvider>
           <BackgroundAudio />
