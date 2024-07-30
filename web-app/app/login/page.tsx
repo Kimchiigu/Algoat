@@ -90,7 +90,7 @@ function LoginPage() {
           <div
             className="flex flex-col rounded-md py-16 px-12 shadow-xl"
             style={{
-              backdropFilter: "blur(16px)",
+              backdropFilter: "blur(1px)",
               backgroundColor: "rgba(255, 255, 255, 0.25)",
               boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
               borderRadius: "16px",
