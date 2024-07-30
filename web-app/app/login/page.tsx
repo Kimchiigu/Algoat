@@ -52,6 +52,7 @@ function LoginPage() {
       toast({
         title: "Login failed",
         description: errorMessage,
+        duration: 5000,
       });
     }
   };

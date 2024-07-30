@@ -40,6 +40,7 @@ export default function NewForumDialog() {
       toast({
         title: "Post failed",
         description: message,
+        duration: 5000,
       });
     } else {
       setTitle("");
@@ -49,6 +50,7 @@ export default function NewForumDialog() {
       toast({
         title: "Post success",
         description: "Forum posted successfully",
+        duration: 5000,
       });
     }
   };
