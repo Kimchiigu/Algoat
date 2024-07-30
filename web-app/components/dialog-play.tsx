@@ -1,3 +1,7 @@
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { auth } from "@/firebase";
+import { createRoom, joinRoom } from "@/controller/room-controller";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import {
   Card,
@@ -11,9 +15,35 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ThemeProvider } from "next-themes";
 
 export default function PlayDialog() {
+  const [roomName, setRoomName] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [roomPassword, setRoomPassword] = useState("");
+  const [joinRoomId, setJoinRoomId] = useState("");
+  const [userName, setUserName] = useState("");
+
+  const router = useRouter();
+
+  const handleCreateRoom = async () => {
+    await createRoom(roomName, roomId, roomPassword);
+    router.push(`/room/${roomId}`);
+  };
+
+  const handleJoinRoom = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const room = await joinRoom(joinRoomId, user.uid, userName);
+      if (room) {
+        router.push(`/room/${room}`);
+      } else {
+        console.log("Room not found");
+      }
+    } else {
+      console.log("User not authenticated");
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -38,23 +68,44 @@ export default function PlayDialog() {
               <CardContent className="space-y-2">
                 <div className="space-y-1">
                   <Label htmlFor="name">Room Name</Label>
-                  <Input id="name" placeholder="Input room name" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="username">Room ID</Label>
-                  <Input id="username" placeholder="Input room ID" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="username">Room Password</Label>
                   <Input
-                    id="username"
+                    id="name"
+                    placeholder="Input room name"
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="id">Room ID</Label>
+                  <Input
+                    id="id"
+                    placeholder="Input room ID"
+                    value={roomId}
+                    onChange={(e) => setRoomId(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="password">Room Password</Label>
+                  <Input
+                    id="password"
                     placeholder="Input room password"
                     type="password"
+                    value={roomPassword}
+                    onChange={(e) => setRoomPassword(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="username">Your Name</Label>
+                  <Input
+                    id="username"
+                    placeholder="Input your name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
                   />
                 </div>
               </CardContent>
               <CardFooter>
-                <Button>Create Room</Button>
+                <Button onClick={handleCreateRoom}>Create Room</Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -68,12 +119,27 @@ export default function PlayDialog() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="space-y-1">
-                  <Label htmlFor="current">Room ID</Label>
-                  <Input id="current" type="text" placeholder="Input room ID" />
+                  <Label htmlFor="joinId">Room ID</Label>
+                  <Input
+                    id="joinId"
+                    type="text"
+                    placeholder="Input room ID"
+                    value={joinRoomId}
+                    onChange={(e) => setJoinRoomId(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="username">Your Name</Label>
+                  <Input
+                    id="username"
+                    placeholder="Input your name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                  />
                 </div>
               </CardContent>
               <CardFooter>
-                <Button>Join Room</Button>
+                <Button onClick={handleJoinRoom}>Join Room</Button>
               </CardFooter>
             </Card>
           </TabsContent>
