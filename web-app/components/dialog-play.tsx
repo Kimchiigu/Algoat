@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import useUserStore from "@/lib/user-store";
 
 export default function PlayDialog() {
   const [roomName, setRoomName] = useState("");
@@ -25,20 +26,33 @@ export default function PlayDialog() {
   const [userName, setUserName] = useState("");
 
   const router = useRouter();
+  const { currentUser } = useUserStore();
 
   const handleCreateRoom = async () => {
-    await createRoom(roomName, roomId, roomPassword);
-    router.push(`/room/${roomId}`);
-  };
-
-  const handleJoinRoom = async () => {
     const user = auth.currentUser;
     if (user) {
+      try {
+        const roomId = await createRoom(roomName, roomPassword, user.uid);
+        handleJoinRoom(roomId.toString(), true);
+      } catch (e) {
+        console.error("Error creating room: ", e);
+      }
+    } else {
+      console.log("User not authenticated");
+    }
+  };
+
+  const handleJoinRoom = async (
+    roomId: string,
+    isCreating: boolean = false
+  ) => {
+    if (currentUser) {
       const room = await joinRoom(
-        joinRoomId,
+        roomId,
         joinRoomPassword,
-        user.uid,
-        userName
+        currentUser.id,
+        userName,
+        isCreating
       );
       if (room) {
         router.push(`/room/${room}`);
@@ -79,15 +93,6 @@ export default function PlayDialog() {
                     placeholder="Input room name"
                     value={roomName}
                     onChange={(e) => setRoomName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="id">Room ID</Label>
-                  <Input
-                    id="id"
-                    placeholder="Input room ID"
-                    value={roomId}
-                    onChange={(e) => setRoomId(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1">
@@ -155,7 +160,9 @@ export default function PlayDialog() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button onClick={handleJoinRoom}>Join Room</Button>
+                <Button onClick={() => handleJoinRoom(joinRoomId, false)}>
+                  Join Room
+                </Button>
               </CardFooter>
             </Card>
           </TabsContent>

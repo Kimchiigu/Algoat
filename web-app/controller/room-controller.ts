@@ -1,28 +1,53 @@
 // firebaseFunctions.ts
-import { doc, getDoc, collection, getDocs, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, setDoc, deleteDoc, onSnapshot, addDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { User } from 'lucide-react';
+import useUserStore from "@/lib/user-store";
 
-export const createRoom = async (roomName: string, roomId: string, roomPassword: string): Promise<void> => {
+const generateRoomId = async (): Promise<number> => {
+  const min = 100000;
+  const max = 999999;
+  let roomId: any;
+  let roomExists = true;
+
+  while (roomExists) {
+    roomId = Math.floor(Math.random() * (max - min + 1)) + min;
+    const roomDocRef = doc(db, 'Rooms', roomId.toString());
+    const roomDocSnap = await getDoc(roomDocRef);
+
+    if (!roomDocSnap.exists()) {
+      roomExists = false;
+    }
+  }
+
+  return roomId;
+};
+
+export const createRoom = async (roomName: string, roomPassword: string, ownerId: any): Promise<number> => {
   try {
-    await setDoc(doc(db, 'rooms', roomId), {
+    const roomId = await generateRoomId();
+    await setDoc(doc(db, 'Rooms', roomId.toString()), {
+      owner: ownerId,
       name: roomName,
       password: roomPassword,
     });
     console.log('Room created with ID: ', roomId);
+    return roomId;
   } catch (e) {
     console.error('Error adding document: ', e);
+    throw e;
   }
 };
 
-export const joinRoom = async (roomId: string, roomPassword: string, userId: string, userName: string): Promise<string | null> => {
+export const joinRoom = async (roomId: string, roomPassword: string, userId: string, userName: string, isCreating: boolean = false): Promise<string | null> => {
   try {
-    const roomDocRef = doc(db, 'rooms', roomId);
+    const roomDocRef = doc(db, 'Rooms', roomId);
     const roomDocSnap = await getDoc(roomDocRef);
 
     if (roomDocSnap.exists()) {
       const roomData = roomDocSnap.data();
-      if (roomData.password === roomPassword) {
-        const playersCollectionRef = collection(roomDocRef, 'players');
+      if (isCreating || roomData.password === roomPassword) {
+        const playersCollectionRef = collection(roomDocRef, 'Players');
         const playerDocRef = doc(playersCollectionRef, userId);
 
         const playerDocSnap = await getDoc(playerDocRef);
@@ -49,8 +74,8 @@ export const joinRoom = async (roomId: string, roomPassword: string, userId: str
 
 export const leaveRoom = async (roomId: string, userId: string): Promise<void> => {
   try {
-    const roomDocRef = doc(db, 'rooms', roomId);
-    const playerDocRef = doc(roomDocRef, 'players', userId);
+    const roomDocRef = doc(db, 'Rooms', roomId);
+    const playerDocRef = doc(roomDocRef, 'Players', userId);
     await deleteDoc(playerDocRef);
     console.log(`User ${userId} left room ${roomId}`);
   } catch (e) {
@@ -63,15 +88,15 @@ export const fetchRoomData = async (
   onUpdate: (data: { roomData: any, playersList: any[] }) => void
 ): Promise<() => void> => {
   try {
-    const roomDocRef = doc(db, 'rooms', roomId);
+    const roomDocRef = doc(db, 'Rooms', roomId);
     
     // Set up real-time listener for the room document
     const unsubscribeRoom = onSnapshot(roomDocRef, async (roomDocSnap) => {
       if (roomDocSnap.exists()) {
         const roomData = roomDocSnap.data();
 
-        // Set up real-time listener for the players subcollection
-        const playersCollectionRef = collection(roomDocRef, 'players');
+        // Set up real-time listener for the Players subcollection
+        const playersCollectionRef = collection(roomDocRef, 'Players');
         const unsubscribePlayers = onSnapshot(playersCollectionRef, (playersSnapshot) => {
           const playersList = playersSnapshot.docs.map(doc => doc.data());
           onUpdate({ roomData, playersList });
