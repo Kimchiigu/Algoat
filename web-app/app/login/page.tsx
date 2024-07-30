@@ -97,7 +97,7 @@ function LoginPage() {
               border: "1px solid rgba(255, 255, 255, 0.18)",
             }}
           >
-            <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight text-primary-foreground">
+            <h2 className="scroll-m-20 border-b border-primary pb-2 text-3xl mb-4 font-semibold tracking-tight text-primary">
               Login Algoaters!
             </h2>
 
@@ -106,9 +106,7 @@ function LoginPage() {
               name="email"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel className="text-primary-foreground">
-                    Email
-                  </FormLabel>
+                  <FormLabel className="text-primary">Email</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Email"
@@ -125,9 +123,7 @@ function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel className="text-primary-foreground">
-                    Password
-                  </FormLabel>
+                  <FormLabel className="text-primary">Password</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
@@ -143,9 +139,9 @@ function LoginPage() {
             <Button className="bg-primary text-primary-foreground">
               Login
             </Button>
-            <p className="mt-4 text-sm text-center text-primary-foreground">
+            <p className="mt-4 text-sm text-center text-primary">
               Don't have an account?{" "}
-              <a href="/register" className="hover:underline text-accent">
+              <a href="/register" className="hover:underline text-primary">
                 Register
               </a>
             </p>

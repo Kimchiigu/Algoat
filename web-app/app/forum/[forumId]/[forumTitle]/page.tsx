@@ -1,18 +1,25 @@
 "use client";
 
 import { db } from "@/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Forum } from "@/components/model/forum-model";
+import GoBack from "@/components/go-back";
+import { loadStarsPreset } from "tsparticles-preset-stars";
+import Particles from "react-tsparticles";
+import type { Engine } from "tsparticles-engine";
+import UserAvatar from "@/components/user-avatar";
+import { useForumsAndUsers } from "@/hooks/forums-hooks";
 
 export default function ForumDetail() {
   const params = useParams();
   const { forumId, forumTitle } = params as {
     forumId: string;
     forumTitle: string;
-  }; // Add type assertion
+  };
   const [forum, setForum] = useState<Forum | null>(null);
+  const { users } = useForumsAndUsers();
 
   useEffect(() => {
     if (forumId) {
@@ -22,9 +29,11 @@ export default function ForumDetail() {
 
         if (forumDocSnap.exists()) {
           const forumData = forumDocSnap.data() as Forum;
-          setForum(forumData); // No need for toDate since it's already a Date
+          forumData.createdAt = (
+            forumData.createdAt as unknown as Timestamp
+          ).toDate();
+          setForum(forumData);
         } else {
-          // Handle forum not found
           console.error("Forum not found");
         }
       };
@@ -33,30 +42,93 @@ export default function ForumDetail() {
     }
   }, [forumId]);
 
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadStarsPreset(engine);
+  }, []);
+
+  const particlesOptions = {
+    preset: "stars",
+    background: {
+      color: {
+        value: "#000",
+      },
+    },
+    particles: {
+      move: {
+        speed: 1,
+      },
+    },
+  };
+
   if (!forum) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div>
-      <h1>{forumTitle.replace(/-/g, " ")}</h1>
-      <p>{forum.contents}</p>
-      {forum.file && (
-        <div>
-          <h2>Attached File:</h2>
-          {forum.fileType?.startsWith("video/") ? (
-            <video controls>
-              <source src={forum.file} type={forum.fileType} />
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <a href={forum.file} download={forum.fileName}>
-              {forum.fileName}
-            </a>
-          )}
+    <div className="relative w-full min-h-screen">
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
+
+      <div className="flex flex-col w-full min-h-screen relative">
+        <GoBack href="/forum"></GoBack>
+        <div className="ml-16 mt-16 mr-16">
+          <div className="bg-secondary-background w-full flex flex-col gap-4 py-4 px-8 border rounded-xl">
+            <h1 className="text-2xl font-bold mb-2">{forum.title}</h1>
+            <UserAvatar
+              username={users[forum.senderId] || "Unknown"}
+              createdAt={forum.createdAt.toLocaleDateString()}
+            />
+            <p>{forum.contents}</p>
+            {forum.file && (
+              <div>
+                {forum.fileType?.startsWith("image/") && (
+                  <div className="w-max h-full justify-start p-6 border-r-8 border-none">
+                    <img
+                      src={forum.file}
+                      className="max-w-96 max-h-96"
+                      alt={forum.fileName}
+                    />
+                  </div>
+                )}
+
+                {forum.fileType?.startsWith("video/") && (
+                  <div className="w-max h-full justify-start p-6 border-r-8 border-none">
+                    <video
+                      src={forum.file}
+                      className="max-w-96 max-h-96"
+                      controls
+                    />
+                  </div>
+                )}
+
+                {forum.fileType?.startsWith("audio/") && (
+                  <div className="w-max h-full justify-start">
+                    <audio
+                      src={forum.file}
+                      className="max-w-96 max-h-96"
+                      controls
+                    />
+                  </div>
+                )}
+
+                {!forum.fileType?.startsWith("image/") &&
+                  !forum.fileType?.startsWith("video/") &&
+                  !forum.fileType?.startsWith("audio/") && (
+                    <div className="w-max h-full justify-start">
+                      <div className="flex flex-col items-center">
+                        <span>{forum.fileName}</span>
+                        <span>{forum.fileType}</span>
+                      </div>
+                    </div>
+                  )}
+              </div>
+            )}
+          </div>
         </div>
-      )}
-      {/* Render other forum details */}
+      </div>
     </div>
   );
 }

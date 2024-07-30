@@ -109,7 +109,7 @@ function RegisterPage() {
               border: "1px solid rgba(255, 255, 255, 0.18)",
             }}
           >
-            <h2 className="scroll-m-20 border-b pb-2 text-3xl mb-4 font-semibold tracking-tight text-primary-foreground">
+            <h2 className="scroll-m-20 border-b border-primary pb-2 text-3xl mb-4 font-semibold tracking-tight text-primary">
               Register with Algoaters!
             </h2>
 
@@ -118,9 +118,7 @@ function RegisterPage() {
               name="email"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel className="text-primary-foreground">
-                    Email
-                  </FormLabel>
+                  <FormLabel className="text-primary">Email</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -138,9 +136,7 @@ function RegisterPage() {
               name="username"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel className="text-primary-foreground">
-                    Username
-                  </FormLabel>
+                  <FormLabel className="text-primary">Username</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Username"
@@ -157,9 +153,7 @@ function RegisterPage() {
               name="password"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel className="text-primary-foreground">
-                    Password
-                  </FormLabel>
+                  <FormLabel className="text-primary">Password</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
@@ -177,7 +171,7 @@ function RegisterPage() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem className="mb-5">
-                  <FormLabel className="text-primary-foreground">
+                  <FormLabel className="text-primary">
                     Confirm Password
                   </FormLabel>
                   <FormControl>
@@ -198,9 +192,9 @@ function RegisterPage() {
             >
               Register
             </Button>
-            <p className="mt-4 text-sm text-center text-primary-foreground">
+            <p className="mt-4 text-sm text-center text-primary">
               Already have an account?{" "}
-              <a href="/login" className="text-accent hover:underline">
+              <a href="/login" className="text-primary hover:underline">
                 Login
               </a>
             </p>

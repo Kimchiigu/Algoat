@@ -5,7 +5,6 @@ import Forum from "@/components/forum";
 import GoBack from "@/components/go-back";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ThemeProvider } from "next-themes";
 import { useCallback } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
@@ -60,7 +59,7 @@ export default function ForumPage() {
         <div
           className="h-[calc(100vh-10em)] mt-8 mx-8"
           style={{
-            backdropFilter: "blur(16px)",
+            backdropFilter: "blur(1px)",
             backgroundColor: "rgba(255, 255, 255, 0.25)",
             boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
             borderRadius: "16px",
@@ -69,7 +68,10 @@ export default function ForumPage() {
         >
           <ScrollArea className="h-full p-8 flex flex-col">
             {forums.map((forum) => (
-              <div key={forum.id} className="border rounded-lg mb-8">
+              <div
+                key={forum.id}
+                className="border rounded-lg mb-8 bg-secondary-background"
+              >
                 <Forum
                   username={users[forum.senderId] || "Unknown"}
                   title={forum.title}
