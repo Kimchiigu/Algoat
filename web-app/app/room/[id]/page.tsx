@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { auth } from "@/firebase";
 import { fetchRoomData, leaveRoom } from "@/controller/room-controller";
 import { Button } from "@/components/ui/button";
+import useUserStore from "@/lib/user-store";
 
 interface RoomData {
   name: string;
@@ -22,12 +23,12 @@ const RoomPage = () => {
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [user, setUser] = useState<any | null>(null);
+  const { currentUser } = useUserStore();
 
   useEffect(() => {
     if (!id || Array.isArray(id)) return;
 
     // Fetch user data and ensure they are authenticated
-    const currentUser = auth.currentUser;
     if (currentUser) {
       setUser(currentUser);
     } else {
@@ -43,6 +44,16 @@ const RoomPage = () => {
       unsubscribe = await fetchRoomData(
         id as string,
         ({ roomData, playersList }) => {
+          const isMember = playersList.some(
+            (player) => player.userId === currentUser?.id
+          );
+
+          if (!isMember) {
+            console.log("User is not a member of the room");
+            router.push("/");
+            return;
+          }
+
           setRoomData(roomData);
           setPlayers(playersList);
         }

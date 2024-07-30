@@ -21,6 +21,7 @@ export default function PlayDialog() {
   const [roomId, setRoomId] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
   const [joinRoomId, setJoinRoomId] = useState("");
+  const [joinRoomPassword, setJoinRoomPassword] = useState("");
   const [userName, setUserName] = useState("");
 
   const router = useRouter();
@@ -33,11 +34,16 @@ export default function PlayDialog() {
   const handleJoinRoom = async () => {
     const user = auth.currentUser;
     if (user) {
-      const room = await joinRoom(joinRoomId, user.uid, userName);
+      const room = await joinRoom(
+        joinRoomId,
+        joinRoomPassword,
+        user.uid,
+        userName
+      );
       if (room) {
         router.push(`/room/${room}`);
       } else {
-        console.log("Room not found");
+        console.log("Room not found or incorrect password");
       }
     } else {
       console.log("User not authenticated");
@@ -114,7 +120,7 @@ export default function PlayDialog() {
               <CardHeader>
                 <CardTitle>Join Room</CardTitle>
                 <CardDescription>
-                  Enter Room ID to Join the Room
+                  Enter Room ID and Password to Join the Room
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -126,6 +132,16 @@ export default function PlayDialog() {
                     placeholder="Input room ID"
                     value={joinRoomId}
                     onChange={(e) => setJoinRoomId(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="joinPassword">Room Password</Label>
+                  <Input
+                    id="joinPassword"
+                    type="password"
+                    placeholder="Input room password"
+                    value={joinRoomPassword}
+                    onChange={(e) => setJoinRoomPassword(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1">
