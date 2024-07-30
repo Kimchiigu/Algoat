@@ -14,23 +14,29 @@ export const createRoom = async (roomName: string, roomId: string, roomPassword:
   }
 };
 
-export const joinRoom = async (roomId: string, userId: string, userName: string): Promise<string | null> => {
+export const joinRoom = async (roomId: string, roomPassword: string, userId: string, userName: string): Promise<string | null> => {
   try {
     const roomDocRef = doc(db, 'rooms', roomId);
     const roomDocSnap = await getDoc(roomDocRef);
 
     if (roomDocSnap.exists()) {
-      const playersCollectionRef = collection(roomDocRef, 'players');
-      const playerDocRef = doc(playersCollectionRef, userId);
+      const roomData = roomDocSnap.data();
+      if (roomData.password === roomPassword) {
+        const playersCollectionRef = collection(roomDocRef, 'players');
+        const playerDocRef = doc(playersCollectionRef, userId);
 
-      const playerDocSnap = await getDoc(playerDocRef);
-      if (!playerDocSnap.exists()) {
-        await setDoc(playerDocRef, { userName });
-        console.log(`User ${userName} joined room ${roomId}`);
+        const playerDocSnap = await getDoc(playerDocRef);
+        if (!playerDocSnap.exists()) {
+          await setDoc(playerDocRef, { userName, userId });
+          console.log(`User ${userName} joined room ${roomId}`);
+        } else {
+          console.log(`User ${userName} already in room ${roomId}`);
+        }
+        return roomId;
       } else {
-        console.log(`User ${userName} already in room ${roomId}`);
+        console.log('Incorrect password');
+        return null;
       }
-      return roomId;
     } else {
       console.log('No such room!');
       return null;
