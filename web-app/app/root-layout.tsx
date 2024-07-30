@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
 import useUserStore from "@/lib/user-store";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,11 +37,18 @@ export default function RootLayout({
     <html lang="en">
       <link rel="icon" href="/logo_light.png" sizes="any" />
       <body className={inter.className}>
-        <VolumeProvider>
-          <BackgroundAudio />
-          {children}
-        </VolumeProvider>
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <VolumeProvider>
+            <BackgroundAudio />
+            {children}
+          </VolumeProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -12,8 +12,10 @@ import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import { useForumsAndUsers } from "@/hooks/forums-hooks";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function ForumPage() {
+  const router = useRouter();
   const { forums, users } = useForumsAndUsers();
 
   const particlesInit = useCallback(async (engine: Engine) => {
@@ -35,62 +37,64 @@ export default function ForumPage() {
   };
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <div className="relative w-full min-h-screen">
-        <Particles
-          id="tsparticles"
-          init={particlesInit}
-          options={particlesOptions}
-        />
+    <div className="relative w-full min-h-screen">
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
 
-        <div className="flex flex-col w-full min-h-screen relative">
-          <GoBack href="/home"></GoBack>
-          <div className="flex flex-row items-center justify-center mt-4">
-            <Input
-              className="w-1/2 p-6 bg-gray-700 text-white placeholder-gray-400 rounded-lg shadow-lg"
-              placeholder="Search discussion"
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.25)",
-                backdropFilter: "blur(16px)",
-              }}
-            />
-            <NewForumDialog></NewForumDialog>
-          </div>
-          <div
-            className="h-[calc(100vh-10em)] mt-8 mx-8"
+      <div className="flex flex-col w-full min-h-screen relative">
+        <GoBack href="/home"></GoBack>
+        <div className="flex flex-row items-center justify-center mt-4">
+          <Input
+            className="w-1/2 p-6 bg-gray-700 text-white placeholder-gray-400 rounded-lg shadow-lg"
+            placeholder="Search discussion"
             style={{
-              backdropFilter: "blur(16px)",
               backgroundColor: "rgba(255, 255, 255, 0.25)",
-              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-              borderRadius: "16px",
-              border: "1px solid rgba(255, 255, 255, 0.18)",
+              backdropFilter: "blur(16px)",
             }}
-          >
-            <ScrollArea className="h-full p-8 flex flex-col">
-              {forums.map((forum) => (
-                <div className="border rounded-lg mb-8">
-                  <Forum
-                    key={forum.id}
-                    username={users[forum.senderId] || "Unknown"}
-                    title={forum.title}
-                    content={forum.contents}
-                    createdAt={forum.createdAt}
-                    file={forum.file}
-                    fileName={forum.fileName}
-                    fileType={forum.fileType}
-                  />
-                  <Button className="ml-8 mb-8">See more</Button>
-                </div>
-              ))}
-            </ScrollArea>
-          </div>
+          />
+          <NewForumDialog></NewForumDialog>
+        </div>
+        <div
+          className="h-[calc(100vh-10em)] mt-8 mx-8"
+          style={{
+            backdropFilter: "blur(16px)",
+            backgroundColor: "rgba(255, 255, 255, 0.25)",
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+            borderRadius: "16px",
+            border: "1px solid rgba(255, 255, 255, 0.18)",
+          }}
+        >
+          <ScrollArea className="h-full p-8 flex flex-col">
+            {forums.map((forum) => (
+              <div key={forum.id} className="border rounded-lg mb-8">
+                <Forum
+                  username={users[forum.senderId] || "Unknown"}
+                  title={forum.title}
+                  content={forum.contents}
+                  createdAt={forum.createdAt}
+                  file={forum.file}
+                  fileName={forum.fileName}
+                  fileType={forum.fileType}
+                />
+                <Button
+                  className="ml-8 mb-8"
+                  onClick={() => {
+                    const formattedTitle = forum.title
+                      .replace(/\s+/g, "-")
+                      .toLowerCase();
+                    router.push(`/forum/${forum.id}/${formattedTitle}`);
+                  }}
+                >
+                  See more
+                </Button>
+              </div>
+            ))}
+          </ScrollArea>
         </div>
       </div>
-    </ThemeProvider>
+    </div>
   );
 }
