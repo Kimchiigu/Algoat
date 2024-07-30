@@ -2,8 +2,14 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { auth } from "@/firebase";
-import { fetchRoomData, leaveRoom } from "@/controller/room-controller";
+import {
+  createRoom,
+  joinRoom,
+  sendMessage,
+  handleRoomLifecycle,
+  leaveRoom,
+  updateRoomSettings,
+} from "@/controller/room-controller";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +32,10 @@ import useUserStore from "@/lib/user-store";
 interface RoomData {
   name: string;
   password: string;
-  owner: string;
+  ownerId: string;
+  topic: string;
+  numQuestions: number;
+  answerTime: number;
 }
 
 interface Player {
@@ -39,6 +48,8 @@ const RoomPage = () => {
   const { id } = useParams();
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [messageInput, setMessageInput] = useState("");
   const [user, setUser] = useState<any | null>(null);
   const [topic, setTopic] = useState("Data Structure");
   const [numQuestions, setNumQuestions] = useState(10);
@@ -46,56 +57,18 @@ const RoomPage = () => {
   const { currentUser } = useUserStore();
 
   useEffect(() => {
-    if (!id || Array.isArray(id)) return;
-
-    if (currentUser) {
-      setUser(currentUser);
-    } else {
-      console.log("User not authenticated");
-      router.push("/");
-      return;
-    }
-
-    const fetchData = async () => {
-      // Fetch player list first
-      let unsubscribePlayers: (() => void) | undefined;
-      unsubscribePlayers = await fetchRoomData(
-        id as string,
-        async ({ playersList }) => {
-          const isMember = playersList.some(
-            (player) => player.userId === currentUser?.id
-          );
-
-          if (!isMember) {
-            console.log("User is not a member of the room");
-            router.push("/");
-            return;
-          }
-
-          setPlayers(playersList);
-
-          // Fetch room data
-          let unsubscribeRoom: (() => void) | undefined;
-          unsubscribeRoom = await fetchRoomData(
-            id as string,
-            ({ roomData }) => {
-              setRoomData(roomData);
-            }
-          );
-
-          return () => {
-            if (unsubscribeRoom) unsubscribeRoom();
-          };
-        }
-      );
-
-      return () => {
-        if (unsubscribePlayers) unsubscribePlayers();
-      };
-    };
-
-    fetchData();
-  }, [id, router]);
+    handleRoomLifecycle(
+      id as string,
+      currentUser,
+      setRoomData,
+      setPlayers,
+      setMessages,
+      setTopic,
+      setNumQuestions,
+      setAnswerTime,
+      router
+    );
+  }, [id, router, currentUser]);
 
   const handleLeaveRoom = async () => {
     if (user && typeof id === "string") {
@@ -104,19 +77,38 @@ const RoomPage = () => {
     }
   };
 
+  const handleSendMessage = async () => {
+    if (currentUser && messageInput.trim() !== "") {
+      await sendMessage(id as string, currentUser.id, messageInput);
+      setMessageInput("");
+    }
+  };
+
+  const handleUpdateSettings = async () => {
+    if (roomData && currentUser && currentUser.id === roomData.ownerId) {
+      await updateRoomSettings(id as string, {
+        topic,
+        numQuestions,
+        answerTime,
+      });
+    }
+  };
+
   if (!roomData) return <div>Loading...</div>;
 
+  const isOwner = currentUser && currentUser.id === roomData.ownerId;
+
   return (
-    <div className="flex w-full h-full p-4">
+    <div className="flex w-full h-screen p-4 space-x-6 bg-background text-foreground">
       {/* Participants Section */}
-      <div className="w-1/4 p-4">
-        <h2 className="text-xl font-bold">Participants</h2>
-        <ul>
+      <div className="flex flex-col p-4 bg-card rounded-md shadow-md w-1/4">
+        <h2 className="text-xl font-bold mb-2">Participants</h2>
+        <ul className="space-y-2">
           {players.map((player, index) => (
             <li key={index} className="flex items-center space-x-2">
               <span className="h-4 w-4 bg-gray-300 rounded-full"></span>
               <span>{player.userName}</span>
-              {roomData.owner === player.userId && (
+              {roomData.ownerId === player.userId && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -127,7 +119,7 @@ const RoomPage = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="lucide lucide-crown"
+                  className="lucide lucide-crown text-primary"
                 >
                   <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
                   <path d="M5 21h14" />
@@ -136,81 +128,122 @@ const RoomPage = () => {
             </li>
           ))}
         </ul>
-        <Button className="mt-4" onClick={handleLeaveRoom}>
+        <Button
+          className="mt-4 bg-destructive text-destructive-foreground"
+          onClick={handleLeaveRoom}
+        >
           Leave Room
         </Button>
       </div>
 
       {/* Room Settings Section */}
-      <div className="w-1/2 p-4">
+      <div className="flex flex-col p-4 bg-card rounded-md shadow-md w-1/2">
         <Card>
           <CardHeader>
-            <CardTitle>Choose Topic</CardTitle>
-            <Select value={topic} onValueChange={(value) => setTopic(value)}>
-              <SelectTrigger>
-                <SelectValue>{topic}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Data Structure">Data Structure</SelectItem>
-                <SelectItem value="Algorithms">Algorithms</SelectItem>
-                <SelectItem value="Database">Database</SelectItem>
-              </SelectContent>
-            </Select>
+            <CardTitle className="text-primary">Room Settings</CardTitle>
+            {isOwner ? (
+              <Select value={topic} onValueChange={(value) => setTopic(value)}>
+                <SelectTrigger>
+                  <SelectValue>{topic}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Data Structure">Data Structure</SelectItem>
+                  <SelectItem value="Algorithms">Algorithms</SelectItem>
+                  <SelectItem value="Database">Database</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <p>{roomData.topic}</p>
+            )}
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <Label htmlFor="numQuestions">Number of Questions</Label>
-              <Select
-                value={numQuestions.toString()}
-                onValueChange={(value) => setNumQuestions(Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue>{numQuestions}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {[5, 6, 7, 8, 9, 10].map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="numQuestions" className="text-secondary">
+                Number of Questions
+              </Label>
+              {isOwner ? (
+                <Select
+                  value={numQuestions.toString()}
+                  onValueChange={(value) => setNumQuestions(Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue>{numQuestions}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[5, 6, 7, 8, 9, 10].map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p>{roomData.numQuestions}</p>
+              )}
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="answerTime">Answer Time (in minutes)</Label>
-              <Select
-                value={answerTime.toString()}
-                onValueChange={(value) => setAnswerTime(Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue>{answerTime}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5].map((time) => (
-                    <SelectItem key={time} value={time.toString()}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <Label htmlFor="answerTime" className="text-secondary">
+                Answer Time (in minutes)
+              </Label>
+              {isOwner ? (
+                <Select
+                  value={answerTime.toString()}
+                  onValueChange={(value) => setAnswerTime(Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue>{answerTime}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5].map((time) => (
+                      <SelectItem key={time} value={time.toString()}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p>{roomData.answerTime}</p>
+              )}
             </div>
-            <Button className="mt-4">Start</Button>
+            {isOwner && (
+              <Button
+                className="mt-4 bg-primary text-primary-foreground"
+                onClick={handleUpdateSettings}
+              >
+                Update Settings
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>
 
       {/* Chat Section */}
-      <div className="w-1/4 p-4">
-        <h2 className="text-xl font-bold">Room ID: {id}</h2>
-        <div className="space-y-2">
-          {players.map((player, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <span className="h-4 w-4 bg-gray-300 rounded-full"></span>
-              <span>{player.userName}</span>
-            </div>
-          ))}
+      <div className="flex flex-col p-4 bg-card rounded-md shadow-md w-1/4 flex-grow">
+        <h2 className="text-xl font-bold mb-2">Room ID: {id}</h2>
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-auto mb-4 space-y-2 bg-secondary-background p-2 rounded-md">
+            {messages.map((message, index) => (
+              <div key={index} className="mb-2">
+                <strong>{message.userName}</strong>: {message.message}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Input
+              id="messageInput"
+              placeholder="Type your message"
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              className="bg-primary text-primary-foreground"
+              onClick={handleSendMessage}
+            >
+              Send
+            </Button>
+          </div>
         </div>
-        <Button className="mt-4">Open Chat with Sheet</Button>
       </div>
     </div>
   );
