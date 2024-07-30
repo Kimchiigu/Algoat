@@ -65,6 +65,7 @@ function RegisterPage() {
       toast({
         title: "Register failed",
         description: errorMessage,
+        duration: 5000,
       });
     }
   };
