@@ -1,5 +1,5 @@
 // firebaseFunctions.ts
-import { doc, getDoc, collection, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
 
 export const createRoom = async (roomName: string, roomId: string, roomPassword: string): Promise<void> => {
@@ -52,24 +52,41 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
   }
 };
 
-export const fetchRoomData = async (roomId: string): Promise<{ roomData: any, playersList: any[] } | null> => {
+export const fetchRoomData = async (
+  roomId: string,
+  onUpdate: (data: { roomData: any, playersList: any[] }) => void
+): Promise<() => void> => {
   try {
     const roomDocRef = doc(db, 'rooms', roomId);
-    const roomDocSnap = await getDoc(roomDocRef);
+    
+    // Set up real-time listener for the room document
+    const unsubscribeRoom = onSnapshot(roomDocRef, async (roomDocSnap) => {
+      if (roomDocSnap.exists()) {
+        const roomData = roomDocSnap.data();
 
-    if (roomDocSnap.exists()) {
-      const roomData = roomDocSnap.data();
-      const playersCollectionRef = collection(roomDocRef, 'players');
-      const playersSnapshot = await getDocs(playersCollectionRef);
-      const playersList = playersSnapshot.docs.map(doc => doc.data());
+        // Set up real-time listener for the players subcollection
+        const playersCollectionRef = collection(roomDocRef, 'players');
+        const unsubscribePlayers = onSnapshot(playersCollectionRef, (playersSnapshot) => {
+          const playersList = playersSnapshot.docs.map(doc => doc.data());
+          onUpdate({ roomData, playersList });
+        });
 
-      return { roomData, playersList };
-    } else {
-      console.log('No such room!');
-      return null;
-    }
+        // Combine unsubscribe functions
+        const unsubscribe = () => {
+          unsubscribeRoom();
+          unsubscribePlayers();
+        };
+
+        return unsubscribe;
+      } else {
+        console.log('No such room!');
+        return () => {}; // Return an empty function if the room doesn't exist
+      }
+    });
+
+    return unsubscribeRoom; // Return the room unsubscribe function
   } catch (e) {
     console.error('Error fetching room data: ', e);
-    return null;
+    return () => {}; // Return an empty function in case of an error
   }
 };

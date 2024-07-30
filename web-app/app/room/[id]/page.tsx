@@ -21,33 +21,40 @@ const RoomPage = () => {
   const { id } = useParams();
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [user, setUser] = useState<any | null>(null); // Adjust type according to your user model
+  const [user, setUser] = useState<any | null>(null);
 
   useEffect(() => {
-    const fetchUserData = () => {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        console.log("User not authenticated");
-        router.push("/");
-      }
-    };
+    if (!id || Array.isArray(id)) return;
 
-    const fetchRoomInfo = async () => {
-      if (typeof id === "string") {
-        const data = await fetchRoomData(id);
-        if (data) {
-          setRoomData(data.roomData);
-          setPlayers(data.playersList);
-        } else {
-          router.push("/");
+    // Fetch user data and ensure they are authenticated
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      setUser(currentUser);
+    } else {
+      console.log("User not authenticated");
+      router.push("/");
+      return;
+    }
+
+    let unsubscribe: (() => void) | undefined;
+
+    // Fetch room data and set up listeners
+    const fetchData = async () => {
+      unsubscribe = await fetchRoomData(
+        id as string,
+        ({ roomData, playersList }) => {
+          setRoomData(roomData);
+          setPlayers(playersList);
         }
-      }
+      );
     };
 
-    fetchUserData();
-    fetchRoomInfo();
+    fetchData();
+
+    // Cleanup on component unmount
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [id, router]);
 
   const handleLeaveRoom = async () => {
