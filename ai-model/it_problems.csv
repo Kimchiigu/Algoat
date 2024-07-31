@@ -1,6 +1,0 @@
-problem_description,solution
-How to fix a '404 Not Found' error?,Check if the URL is correct or if the page has been moved.
-How to recover a lost password on Windows?,Use the password reset feature on the login screen.
-How to install Python on Linux?,"Use the package manager to install Python, e.g., `sudo apt-get install python3`."
-How to set up a virtual environment in Python?,Use `venv` or `virtualenv` to create an isolated environment.
-How to resolve a 'Connection refused' error in a web server?,Check if the web server is running and if the firewall settings are correct.
