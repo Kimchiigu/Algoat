@@ -1,0 +1,100 @@
+1. SELECT is a SQL command used to retrieve data from a database.
+2. The SELECT statement is used to query the database and retrieve selected data that matches the criteria specified.
+3. SELECT allows you to specify the columns you want to retrieve from a table.
+4. SELECT * retrieves all columns from the specified table.
+5. The SELECT statement can include conditions to filter the data using the WHERE clause.
+6. SELECT can retrieve data from one or more tables using JOINs.
+7. You can use SELECT to perform calculations and return computed results.
+8. SELECT DISTINCT is used to retrieve unique values, eliminating duplicates from the result set.
+9. The ORDER BY clause in SELECT is used to sort the retrieved data in ascending or descending order.
+10. The LIMIT clause in SELECT restricts the number of rows returned by the query.
+11. SELECT allows the use of aggregate functions like COUNT, SUM, AVG, MAX, and MIN to perform calculations on data.
+12. The GROUP BY clause in SELECT is used to group rows that have the same values in specified columns into summary rows.
+13. The HAVING clause in SELECT is used to filter groups based on a condition, similar to the WHERE clause but for groups.
+14. SELECT can be used with subqueries to retrieve data based on the results of another query.
+15. You can use the AS keyword in SELECT to rename columns or create aliases.
+16. SELECT allows the use of conditional logic with the CASE statement.
+17. You can combine multiple SELECT queries using UNION or UNION ALL to return a single result set.
+18. SELECT supports the use of pattern matching with the LIKE operator.
+19. SELECT can retrieve data from views, which are virtual tables based on the result of a SELECT query.
+20. The SELECT INTO statement is used to create a new table and insert the result set into it.
+21. You can use SELECT with JOINs to combine rows from two or more tables based on related columns.
+22. SELECT supports window functions to perform calculations across a set of table rows related to the current row.
+23. SELECT can be used to retrieve data in XML or JSON format.
+24. The SELECT statement is the most commonly used SQL command for data retrieval.
+25. SELECT can retrieve data from stored procedures and functions in some database systems.
+26. You can use the TOP clause in SELECT to return the top N rows from the result set.
+27. SELECT allows the use of wildcards with the LIKE operator to filter data based on patterns.
+28. The SELECT statement can include column expressions, which are combinations of column names, constants, and functions.
+29. SELECT can retrieve data from database synonyms, which are aliases for database objects.
+30. You can use SELECT to retrieve data with conditional aggregation using the FILTER clause.
+31. SELECT supports the use of temporary tables to store intermediate results.
+32. The SELECT statement can retrieve data from indexed views for improved performance.
+33. SELECT can be used with set operators like INTERSECT and EXCEPT to combine result sets.
+34. The SELECT statement can include a CTE (Common Table Expression) to simplify complex queries.
+35. SELECT allows the retrieval of hierarchical data using recursive CTEs.
+36. You can use SELECT to retrieve data from materialized views, which are stored query results.
+37. The SELECT statement can include comments to improve query readability.
+38. SELECT supports the use of collation to specify the sort order of textual data.
+39. You can use the FETCH clause in SELECT to control the number of rows returned by a query.
+40. SELECT allows the retrieval of data with time and date functions.
+41. The SELECT statement can be used to perform data pivoting with the PIVOT clause.
+42. SELECT can retrieve data from database links to access remote databases.
+43. You can use SELECT to retrieve data with row numbering using the ROW_NUMBER function.
+44. SELECT supports the use of analytical functions like RANK and DENSE_RANK.
+45. The SELECT statement can retrieve data from partitioned tables.
+46. SELECT allows the use of string functions to manipulate textual data.
+47. SELECT can be used to retrieve data with spatial functions in spatial databases.
+48. The SELECT statement supports the use of encryption and decryption functions.
+49. SELECT can retrieve data from in-memory tables for faster performance.
+50. You can use SELECT to retrieve data with user-defined functions.
+51. SELECT supports the use of bitwise operations on integer data.
+52. The SELECT statement can include error handling with TRY...CATCH blocks.
+53. SELECT allows the retrieval of data with full-text search functions.
+54. SELECT can retrieve data from system tables and catalog views.
+55. The SELECT statement supports the use of advanced data types like JSON and XML.
+56. SELECT allows the retrieval of data with regular expressions in some database systems.
+57. SELECT can be used to retrieve data with geospatial functions in geographic databases.
+58. The SELECT statement can include hints to optimize query performance.
+59. SELECT supports the use of session variables to store intermediate results.
+60. You can use SELECT to retrieve data with recursive queries.
+61. SELECT allows the retrieval of data with statistical functions.
+62. The SELECT statement can retrieve data from clustered and non-clustered indexes.
+63. SELECT supports the use of dynamic SQL to build and execute queries at runtime.
+64. SELECT can retrieve data with cross joins to combine all rows from two or more tables.
+65. The SELECT statement allows the use of conditional queries with the IIF function.
+66. SELECT supports the retrieval of data with hierarchical queries using the CONNECT BY clause.
+67. SELECT can retrieve data from user-defined types and objects.
+68. The SELECT statement can include table-valued functions to return table data.
+69. SELECT allows the retrieval of data with currency and financial functions.
+70. SELECT can be used to retrieve data with windowing and framing using the OVER clause.
+71. The SELECT statement supports the use of sequence objects to generate unique numbers.
+72. SELECT allows the retrieval of data with ranking functions like NTILE.
+73. SELECT can retrieve data from partitioned views to improve performance.
+74. The SELECT statement supports the use of collation sequences to specify text comparison rules.
+75. SELECT can retrieve data with time zone conversions and functions.
+76. SELECT allows the use of the RECURSIVE keyword for recursive queries in some database systems.
+77. The SELECT statement can include aggregate functions with GROUPING SETS.
+78. SELECT can retrieve data with multi-dimensional expressions (MDX) in OLAP databases.
+79. SELECT supports the use of system functions to retrieve metadata and system information.
+80. SELECT can retrieve data with pivot and unpivot operations.
+81. The SELECT statement allows the use of the APPLY operator for table-valued functions.
+82. SELECT can retrieve data with data masking functions for privacy.
+83. SELECT supports the use of JSON functions to query and manipulate JSON data.
+84. SELECT can retrieve data from columns with sparse storage for efficient data storage.
+85. The SELECT statement can include windowed aggregates for complex calculations.
+86. SELECT allows the use of the WITH TIES clause to include additional rows with matching values.
+87. SELECT can retrieve data with the CROSS APPLY and OUTER APPLY operators.
+88. SELECT supports the retrieval of data with ROW and ROWNUM pseudo-columns in some database systems.
+89. The SELECT statement allows the use of transaction control commands like BEGIN, COMMIT, and ROLLBACK.
+90. SELECT can retrieve data with the LAG and LEAD analytical functions.
+91. SELECT supports the use of data compression to improve storage efficiency.
+92. SELECT can retrieve data from encrypted columns for enhanced security.
+93. The SELECT statement allows the use of the CAST and CONVERT functions for data type conversions.
+94. SELECT can retrieve data with data sampling methods.
+95. SELECT supports the use of the FOR XML and FOR JSON clauses to format query results.
+96. SELECT can retrieve data with the OFFSET and FETCH NEXT clauses for pagination.
+97. The SELECT statement allows the use of custom aggregate functions in some database systems.
+98. SELECT supports the retrieval of data with spatial indexes for geographic data.
+99. SELECT can retrieve data with the KEEP keyword for first and last aggregates.
+100. The SELECT statement is a fundamental part of SQL used to retrieve and manipulate data in a database.
