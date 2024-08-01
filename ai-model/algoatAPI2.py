@@ -8,10 +8,25 @@ from rake_nltk import Rake
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict
-import random
 import uuid
-
 from fastapi.middleware.cors import CORSMiddleware
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Firebase Admin SDK setup
+cred = credentials.Certificate("firebase-service.json")  # Replace with your Firebase service account key file
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+# Load BERT model and tokenizer for text embedding
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertModel.from_pretrained('bert-base-uncased')
+
+# Load Sentence-BERT model for context analysis
+sbert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+
+# Initialize RAKE for keyword extraction
+rake = Rake()
 
 app = FastAPI()
 
@@ -28,22 +43,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load BERT model and tokenizer for text embedding
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertModel.from_pretrained('bert-base-uncased')
-
-# Load Sentence-BERT model for context analysis
-sbert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-
-# Initialize RAKE for keyword extraction
-rake = Rake()
-
 class Answer(BaseModel):
     player: str
     answer: str
 
 class QuestionResponse(BaseModel):
     question: str
+    timer: int
 
 class ScoreResponse(BaseModel):
     player: str
@@ -53,18 +59,6 @@ class JudgementResponse(BaseModel):
     question: str
     answers: List[ScoreResponse]
     winner: str
-
-class GameSession:
-    def __init__(self, questions: pd.DataFrame):
-        self.questions = questions.sample(frac=1).reset_index(drop=True)
-        self.current_question_index = -1
-        self.scores = {}
-    
-    def get_next_question(self):
-        self.current_question_index += 1
-        if self.current_question_index >= len(self.questions):
-            raise IndexError("No more questions available")
-        return self.questions.iloc[self.current_question_index]
 
 # Load the dataset
 def load_dataset(base_path):
@@ -93,10 +87,10 @@ def encode_text(text):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
     with torch.no_grad():
         outputs = model(**inputs)
-    return outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
+    return outputs.last_hidden_state.mean(dim=1).squeeze().numpy().tolist()  # Convert to list
 
 def encode_context(text):
-    return sbert_model.encode(text)
+    return sbert_model.encode(text).tolist()  # Convert to list
 
 def extract_keywords(text):
     rake.extract_keywords_from_text(text)
@@ -130,66 +124,86 @@ def get_best_score(user_input, category_df):
 base_path = 'Dataset'  # Replace with your actual dataset path
 df = load_dataset(base_path)
 
-# Dictionary to hold game sessions
-game_sessions: Dict[str, GameSession] = {}
-
 @app.post("/start_game")
 def start_game():
     session_id = str(uuid.uuid4())
-    game_sessions[session_id] = GameSession(df)
+    questions = df.sample(frac=1).to_dict(orient="records")
+    db.collection("games").document(session_id).set({
+        "questions": [{ "question": q["question"], "category": q["category"] } for q in questions],  # Only save necessary info
+        "current_question_index": 0,
+        "scores": {},
+        "is_playing": True,
+        "timer": 5
+    })
     return {"session_id": session_id}
 
 @app.get("/get_question/{session_id}", response_model=QuestionResponse)
 def get_question(session_id: str):
-    if session_id not in game_sessions:
+    game_doc = db.collection("games").document(session_id).get()
+    if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
-    
-    game_session = game_sessions[session_id]
-    
-    try:
-        question = game_session.get_next_question()
-    except IndexError:
+
+    game_data = game_doc.to_dict()
+    current_question_index = game_data["current_question_index"]
+    questions = game_data["questions"]
+
+    if current_question_index >= len(questions):
         raise HTTPException(status_code=404, detail="No more questions available")
-    
-    return QuestionResponse(question=question['question'])
+
+    question = questions[current_question_index]["question"]
+    return QuestionResponse(question=question, timer=5)
 
 @app.post("/submit_answers/{session_id}", response_model=JudgementResponse)
 def submit_answers(session_id: str, answers: List[Answer]):
-    if session_id not in game_sessions:
+    game_doc = db.collection("games").document(session_id).get()
+    if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
-    
-    game_session = game_sessions[session_id]
-    
-    if game_session.current_question_index == -1:
+
+    game_data = game_doc.to_dict()
+    current_question_index = game_data["current_question_index"]
+    questions = game_data["questions"]
+
+    if current_question_index == -1:
         raise HTTPException(status_code=400, detail="No question has been fetched yet")
 
-    current_question = game_session.questions.iloc[game_session.current_question_index]
+    current_question = questions[current_question_index]
+    
+    # Use local dataset for scoring
     category_df = df[df['category'] == current_question['category']].copy()
 
     scores = []
     for answer in answers:
         best_text, best_score = get_best_score(answer.answer, category_df)
         scores.append(ScoreResponse(player=answer.player, score=best_score))
-        game_session.scores[answer.player] = game_session.scores.get(answer.player, 0) + best_score
+        game_data["scores"][answer.player] = game_data["scores"].get(answer.player, 0) + best_score
 
     winner = max(scores, key=lambda x: x.score).player
-    
+
+    # Update the game session in Firestore
+    db.collection("games").document(session_id).update({
+        "current_question_index": current_question_index + 1,
+        "scores": game_data["scores"]
+    })
+
     return JudgementResponse(
-        question=current_question['question'],
+        question=current_question["question"],
         answers=scores,
         winner=winner
     )
 
 @app.post("/end_game/{session_id}")
 def end_game(session_id: str):
-    if session_id not in game_sessions:
+    game_doc = db.collection("games").document(session_id).get()
+    if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
-    
-    game_session = game_sessions.pop(session_id)
-    
-    final_scores = [{"player": player, "score": score} for player, score in game_session.scores.items()]
+
+    game_data = game_doc.to_dict()
+    final_scores = [{"player": player, "score": score} for player, score in game_data["scores"].items()]
     winner = max(final_scores, key=lambda x: x["score"])["player"]
-    
+
+    # Delete the game session from Firestore
+    db.collection("games").document(session_id).delete()
+
     return {"final_scores": final_scores, "winner": winner}
 
 # To run the API, use the command: uvicorn script_name:app --reload

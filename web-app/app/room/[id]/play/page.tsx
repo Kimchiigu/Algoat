@@ -1,19 +1,32 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "@/lib/axiosConfig"; // Import axios from the configuration file
+import axios from "@/lib/axiosConfig";
+import { db } from "@/firebase";
+import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { useParams } from "next/navigation";
 
 interface QuestionResponse {
   question: string;
+  timer: number;
 }
 
 interface Answer {
   player: string;
   answer: string;
+}
+
+interface ScoreResponse {
+  player: string;
+  score: number;
+}
+
+interface JudgementResponse {
+  question: string;
+  answers: ScoreResponse[];
+  winner: string;
 }
 
 const PlayPage = () => {
@@ -25,43 +38,36 @@ const PlayPage = () => {
   const [phase, setPhase] = useState<"question" | "answer" | "judging">(
     "question"
   );
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    // Start the game and fetch the first question
-    const startGame = async () => {
-      try {
-        console.log("Starting game...");
-        const { data } = await axios.post(`http://localhost:8000/start_game`); // Use full URL for debugging
-        console.log("Game started, data:", data);
+    const fetchSessionId = async () => {
+      const roomDocRef = doc(db, "Rooms", id as string);
+      const roomDoc = await getDoc(roomDocRef);
+      if (roomDoc.exists() && roomDoc.data().sessionId) {
+        const sessionId = roomDoc.data().sessionId;
+        setSessionId(sessionId);
+        fetchQuestion(sessionId);
+      } else {
+        const { data } = await axios.post("/start_game");
         setSessionId(data.session_id);
+        await updateDoc(roomDocRef, { sessionId: data.session_id });
         fetchQuestion(data.session_id);
-      } catch (error) {
-        console.error("Error starting the game:", error);
-        if (axios.isAxiosError(error)) {
-          console.error("Axios error details:", {
-            code: error.code,
-            message: error.message,
-            config: error.config,
-            request: error.request,
-          });
-        }
       }
     };
 
-    startGame();
+    fetchSessionId();
   }, [id]);
 
   const fetchQuestion = async (session_id: string) => {
     try {
-      console.log("Fetching question for session:", session_id);
       const { data } = await axios.get<QuestionResponse>(
-        `http://localhost:8000/get_question/${session_id}`
+        `/get_question/${session_id}`
       );
-      console.log("Fetched question:", data);
       setQuestion(data.question);
-      setTimer(5); // 5 seconds to read the question
+      setTimer(data.timer);
       setPhase("question");
     } catch (error) {
       console.error("Error fetching question:", error);
@@ -71,12 +77,13 @@ const PlayPage = () => {
   const submitAnswers = async () => {
     if (!sessionId) return;
     try {
-      console.log("Submitting answers for session:", sessionId);
-      await axios.post(`http://localhost:8000/submit_answers/${sessionId}`, {
-        answers,
-      });
+      const { data } = await axios.post<JudgementResponse>(
+        `/submit_answers/${sessionId}`,
+        { answers }
+      );
+      setMessage(`Winner: ${data.winner}`);
       setPhase("judging");
-      setTimer(10); // 10 seconds judging phase
+      setTimer(10); // Judging phase time
     } catch (error) {
       console.error("Error submitting answers:", error);
     }
@@ -84,21 +91,20 @@ const PlayPage = () => {
 
   useEffect(() => {
     if (timer > 0) {
-      const timeoutId = setTimeout(() => setTimer(timer - 1), 1000);
+      const timeoutId = setTimeout(() => {
+        const newTimer = timer - 1;
+        setTimer(newTimer);
+      }, 1000);
       return () => clearTimeout(timeoutId);
+    } else if (timer === 0 && phase === "question") {
+      setPhase("answer");
+      setTimer(60); // Set to answer time from settings
+    } else if (timer === 0 && phase === "answer") {
+      submitAnswers();
+    } else if (timer === 0 && phase === "judging") {
+      fetchQuestion(sessionId!);
     }
-
-    if (timer === 0) {
-      if (phase === "question") {
-        setPhase("answer");
-        setTimer(60); // Set to answer time from settings
-      } else if (phase === "answer") {
-        submitAnswers();
-      } else if (phase === "judging") {
-        fetchQuestion(sessionId!);
-      }
-    }
-  }, [timer, phase]);
+  }, [timer, phase, sessionId]);
 
   const handleAnswerChange = (player: string, answer: string) => {
     setAnswers((prevAnswers) => {
@@ -153,6 +159,7 @@ const PlayPage = () => {
         <div className="text-center">
           <h1 className="text-4xl font-bold">Judging...</h1>
           <p className="text-xl">Algoat is Judging...</p>
+          <p>{message}</p>
         </div>
       )}
     </div>
