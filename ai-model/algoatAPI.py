@@ -53,7 +53,7 @@ def load_dataset(base_path):
     df['context_embedding'] = df['context'].apply(encode_context)
     return df
 
-def getBestScore(user_input, df):
+def getBestScore(user_input, category_df):
     # Extract context from user input
     user_context = extract_keywords(user_input)
 
@@ -62,22 +62,19 @@ def getBestScore(user_input, df):
     user_context_embedding = encode_context(user_context)
 
     # Calculate similarity scores for text
-    df['text_similarity'] = df['text_embedding'].apply(lambda x: cosine_similarity([x], [user_text_embedding]).item())
+    category_df = category_df.copy()  # Avoiding SettingWithCopyWarning
+    category_df.loc[:, 'text_similarity'] = category_df['text_embedding'].apply(lambda x: cosine_similarity([x], [user_text_embedding]).item())
 
     # Calculate similarity scores for context
-    df['context_similarity'] = df['context_embedding'].apply(lambda x: cosine_similarity([x], [user_context_embedding]).item())
+    category_df.loc[:, 'context_similarity'] = category_df['context_embedding'].apply(lambda x: cosine_similarity([x], [user_context_embedding]).item())
 
     # Combine scores
-    df['final_score'] = (df['text_similarity'] + df['context_similarity']) / 2
+    category_df.loc[:, 'final_score'] = (category_df['text_similarity'] + category_df['context_similarity']) / 2
 
     # Get the best match
-    best_match = df.loc[df['final_score'].idxmax()]
+    best_match = category_df.loc[category_df['final_score'].idxmax()]
 
     return best_match['text'], best_match['final_score']
-
-# Load the dataset
-base_path = './Dataset/'  # Replace with your actual dataset path
-df = load_dataset(base_path)
 
 def play_game(df):
     categories = df['category'].unique()
@@ -87,7 +84,7 @@ def play_game(df):
     
     category_choice = int(input("Choose a category by number: ")) - 1
     selected_category = categories[category_choice]
-    category_df = df[df['category'] == selected_category]
+    category_df = df[df['category'] == selected_category].copy()
 
     random_question = category_df.sample(n=1).iloc[0]
 
@@ -95,16 +92,25 @@ def play_game(df):
 
     players = ["Player 1", "Player 2"]
     scores = {}
+    answers = {}
 
     for player in players:
         user_input = input(f"{player}, enter your answer: ")
         best_text, best_score = getBestScore(user_input, category_df)
         scores[player] = best_score
-        print(f"{player}'s Best Match: {best_text}\nScore: {best_score}")
+        answers[player] = user_input
+
+    print("\nAlgoat the Goat is judging...\n")
+    
+    for player in players:
+        print(f"{player} with '{answers[player]}' gets a score of {scores[player]}")
 
     winner = max(scores, key=scores.get)
-    print(f"The winner is {winner} with a score of {scores[winner]}")
+    print(f"\nThe winner for this round is {winner} with a score of {scores[winner]}")
+
+# Load the dataset
+base_path = 'ai-model/Dataset'  # Replace with your actual dataset path
+df = load_dataset(base_path)
 
 # Start the game
 play_game(df)
-
