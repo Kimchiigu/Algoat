@@ -1,0 +1,100 @@
+1. Enqueue adds an element to the end of the queue. Dequeue removes an element from the front of the queue.
+2. In enqueue, the element is inserted at the rear of the queue. Dequeue operation removes the front element.
+3. Enqueue operation involves adding an element at the tail of the queue. Dequeue involves removing an element from the head.
+4. Enqueue appends an element to the end of the queue. Dequeue removes the first element, shifting the queue forward.
+5. Enqueue places a new element at the end. Dequeue takes out the element at the front.
+6. Enqueue operation is performed by inserting at the rear. Dequeue is done by removing from the front.
+7. Enqueue adds an element to the back. Dequeue removes the element from the front.
+8. Enqueue operation inserts a new element at the rear. Dequeue operation deletes the element from the front.
+9. To enqueue, add the item to the end of the queue. For dequeue, remove the item from the beginning.
+10. Enqueue places the new element at the tail. Dequeue extracts the front element of the queue.
+11. Enqueue adds elements to the rear of the queue. Dequeue removes elements from the front.
+12. Enqueue operation inserts data at the end. Dequeue removes the data at the beginning of the queue.
+13. Enqueue means inserting at the back. Dequeue means removing from the front.
+14. Enqueue adds elements at the queue’s end. Dequeue removes elements from the start.
+15. Enqueue appends data to the tail. Dequeue takes out data from the head.
+16. Enqueue places a new element at the queue's rear. Dequeue takes out the frontmost element.
+17. Enqueue adds items at the queue’s rear end. Dequeue removes items from the front end.
+18. Enqueue operation adds an element at the end of the queue. Dequeue operation removes an element from the front.
+19. Enqueue means adding an item at the rear. Dequeue means removing an item from the front.
+20. Enqueue places an element at the back of the queue. Dequeue removes the front element.
+21. Enqueue adds a new element to the tail. Dequeue removes the first element in line.
+22. Enqueue involves insertion at the end. Dequeue involves deletion at the front.
+23. Enqueue places an element at the queue's end. Dequeue removes the first element.
+24. Enqueue inserts data at the tail end. Dequeue removes data from the head.
+25. Enqueue adds elements at the end of the queue. Dequeue removes elements from the front.
+26. Enqueue adds an element at the back of the queue. Dequeue removes an element from the front.
+27. Enqueue means adding an element at the rear end. Dequeue means removing an element from the front end.
+28. Enqueue appends an element to the tail. Dequeue removes an element from the head.
+29. Enqueue places elements at the rear. Dequeue removes elements from the front.
+30. Enqueue adds elements to the end of the queue. Dequeue removes elements from the start of the queue.
+31. Enqueue operation adds a new element at the end. Dequeue operation removes the front element.
+32. Enqueue adds an element at the end of the queue. Dequeue removes the first element.
+33. Enqueue involves adding an element to the rear. Dequeue involves removing an element from the front.
+34. Enqueue appends to the queue's end. Dequeue removes from the queue's front.
+35. Enqueue places an element at the rear end. Dequeue removes an element from the front end.
+36. Enqueue operation inserts an element at the end. Dequeue operation removes an element from the start.
+37. Enqueue adds items to the end. Dequeue removes items from the front.
+38. Enqueue inserts elements at the rear. Dequeue removes elements from the front.
+39. Enqueue places new elements at the queue's tail. Dequeue removes the oldest elements from the queue's head.
+40. Enqueue means inserting at the back. Dequeue means deleting from the front.
+41. Enqueue adds data at the queue's rear end. Dequeue removes data from the front end.
+42. Enqueue operation is for adding to the back. Dequeue operation is for removing from the front.
+43. Enqueue appends an item at the end. Dequeue deletes an item from the start.
+44. Enqueue places elements at the queue's tail end. Dequeue removes elements from the queue's head end.
+45. Enqueue means adding elements to the rear. Dequeue means removing elements from the front.
+46. Enqueue operation adds to the tail of the queue. Dequeue operation removes from the head of the queue.
+47. Enqueue inserts a new item at the end. Dequeue removes an item from the beginning.
+48. Enqueue appends to the end of the queue. Dequeue extracts from the front of the queue.
+49. Enqueue adds a new element at the back. Dequeue removes the frontmost element.
+50. Enqueue places a new element at the tail. Dequeue removes the oldest element from the head.
+51. Enqueue inserts elements at the end. Dequeue removes elements from the beginning.
+52. Enqueue adds to the rear. Dequeue removes from the front.
+53. Enqueue operation places a new element at the end. Dequeue operation removes an element from the start.
+54. Enqueue adds a new element at the end. Dequeue removes the first element in line.
+55. Enqueue means adding at the end of the queue. Dequeue means removing from the front of the queue.
+56. Enqueue places a new element at the queue's rear. Dequeue takes out the front element.
+57. Enqueue appends an element to the back. Dequeue removes the element from the front.
+58. Enqueue adds an item at the queue's end. Dequeue removes an item from the queue's start.
+59. Enqueue inserts an element at the tail. Dequeue deletes an element from the head.
+60. Enqueue places a new element at the back. Dequeue removes the frontmost element.
+61. Enqueue means adding an element at the end. Dequeue means removing an element from the front.
+62. Enqueue operation adds a new element at the queue's end. Dequeue operation removes an element from the queue's front.
+63. Enqueue places a new item at the back of the queue. Dequeue removes the first item from the queue.
+64. Enqueue appends to the queue's end. Dequeue extracts from the queue's front.
+65. Enqueue adds an element at the queue's rear end. Dequeue removes an element from the queue's front end.
+66. Enqueue inserts a new item at the rear. Dequeue removes an item from the front.
+67. Enqueue operation is for adding an element at the back. Dequeue operation is for removing an element from the front.
+68. Enqueue places a new element at the queue's tail end. Dequeue removes the oldest element from the queue's head end.
+69. Enqueue appends an item to the queue's end. Dequeue extracts an item from the queue's start.
+70. Enqueue operation adds an item at the end of the queue. Dequeue operation removes an item from the front of the queue.
+71. Enqueue adds a new element to the tail of the queue. Dequeue removes the first element from the head of the queue.
+72. Enqueue places an element at the queue's rear. Dequeue removes an element from the queue's front.
+73. Enqueue inserts a new element at the back. Dequeue removes the oldest element from the front.
+74. Enqueue means adding to the end. Dequeue means removing from the front.
+75. Enqueue operation places a new item at the tail. Dequeue operation removes an item from the head.
+76. Enqueue appends elements to the end of the queue. Dequeue removes elements from the start of the queue.
+77. Enqueue adds a new element to the end of the queue. Dequeue removes the front element from the queue.
+78. Enqueue places a new element at the end of the queue. Dequeue removes the oldest element from the front.
+79. Enqueue inserts an element at the queue's tail. Dequeue deletes an element from the queue's head.
+80. Enqueue appends a new element to the end. Dequeue extracts the first element from the front.
+81. Enqueue means adding an element at the rear. Dequeue means removing an element from the front.
+82. Enqueue operation adds an element to the end of the queue. Dequeue operation removes an element from the front of the queue.
+83. Enqueue places a new item at the queue's rear. Dequeue removes an item from the queue's front.
+84. Enqueue appends elements to the tail of the queue. Dequeue extracts elements from the head of the queue.
+85. Enqueue adds a new element at the back. Dequeue removes the first element.
+86. Enqueue operation is for adding an item at the tail. Dequeue operation is for removing an item from the head.
+87. Enqueue means inserting an element at the end. Dequeue means deleting an element from the start.
+88. Enqueue appends to the queue’s tail end. Dequeue removes from the queue’s head end.
+89. Enqueue adds a new item to the rear. Dequeue removes the frontmost item.
+90. Enqueue places an element at the end of the queue. Dequeue removes an element from the front of the queue.
+91. Enqueue inserts a new element at the queue's tail end. Dequeue deletes an element from the queue's head end.
+92. Enqueue means adding to the queue's rear. Dequeue means removing from the queue's front.
+93. Enqueue appends an item at the end. Dequeue removes an item from the beginning.
+94. Enqueue adds elements at the queue’s end. Dequeue removes elements from the queue’s start.
+95. Enqueue operation places a new item at the end. Dequeue operation removes the first item.
+96. Enqueue inserts a new element at the end of the queue. Dequeue removes the first element from the front of the queue.
+97. Enqueue means adding an item to the end of the queue. Dequeue means removing an item from the start of the queue.
+98. Enqueue places a new element at the queue’s tail. Dequeue removes an element from the queue’s head.
+99. Enqueue appends an item to the end of the queue. Dequeue removes an item from the front of the queue.
+100. Enqueue adds a new element at the end of the queue. Dequeue removes the first element from the queue.
