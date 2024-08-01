@@ -267,3 +267,13 @@ export const handleRoomLifecycle = async (
 
   fetchData();
 };
+
+export const startPlaying = async (roomId: string) => {
+  try {
+    const roomDocRef = doc(db, 'Rooms', roomId);
+    await setDoc(roomDocRef, { isPlay: true }, { merge: true });
+    console.log(`Room ${roomId} is now playing.`);
+  } catch (e) {
+    console.error('Error starting the game: ', e);
+  }
+};

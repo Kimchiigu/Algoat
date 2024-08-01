@@ -9,6 +9,7 @@ import {
   handleRoomLifecycle,
   leaveRoom,
   updateRoomSettings,
+  startPlaying,
 } from "@/controller/room-controller";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useUserStore from "@/lib/user-store";
+import { onSnapshot, doc } from "firebase/firestore";
+import { db } from "@/firebase";
 
 interface RoomData {
   name: string;
@@ -36,6 +39,7 @@ interface RoomData {
   topic: string;
   numQuestions: number;
   answerTime: number;
+  isPlay?: boolean;
 }
 
 interface Player {
@@ -50,6 +54,7 @@ const RoomPage = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [messageInput, setMessageInput] = useState("");
+  const [user, setUser] = useState<any | null>(null);
   const [topic, setTopic] = useState("Data Structure");
   const [numQuestions, setNumQuestions] = useState(10);
   const [answerTime, setAnswerTime] = useState(5);
@@ -67,12 +72,23 @@ const RoomPage = () => {
       setAnswerTime,
       router
     );
+
+    // Real-time listener for isPlay
+    const roomDocRef = doc(db, "Rooms", id as string);
+    const unsubscribe = onSnapshot(roomDocRef, (doc) => {
+      const data = doc.data();
+      if (data?.isPlay) {
+        router.push(`/room/${id}/play`);
+      }
+    });
+
+    return () => unsubscribe();
   }, [id, router, currentUser]);
 
   const handleLeaveRoom = async () => {
-    if (currentUser) {
-      await leaveRoom(id as string, currentUser.id);
-      router.push("/home");
+    if (user && typeof id === "string") {
+      await leaveRoom(id, user.uid);
+      router.push("/");
     }
   };
 
@@ -93,12 +109,18 @@ const RoomPage = () => {
     }
   };
 
+  const handleStartPlaying = async () => {
+    if (roomData && currentUser && currentUser.id === roomData.ownerId) {
+      await startPlaying(id as string);
+    }
+  };
+
   if (!roomData) return <div>Loading...</div>;
 
   const isOwner = currentUser && currentUser.id === roomData.ownerId;
 
   return (
-    <div className="flex w-full h-screen p-4 space-x-6 bg-background text-foreground">
+    <div className="flex w-full p-4 space-x-6 bg-background text-foreground h-screen">
       {/* Participants Section */}
       <div className="flex flex-col p-4 bg-card rounded-md shadow-md w-1/4">
         <h2 className="text-xl font-bold mb-2">Participants</h2>
@@ -204,14 +226,38 @@ const RoomPage = () => {
                 <p>{roomData.answerTime}</p>
               )}
             </div>
-            {isOwner && (
-              <Button
-                className="mt-4 bg-primary text-primary-foreground"
-                onClick={handleUpdateSettings}
-              >
-                Update Settings
-              </Button>
-            )}
+            <div className="flex gap-3 justify-center">
+              {isOwner && (
+                <Button
+                  className="bg-primary text-primary-foreground"
+                  onClick={handleUpdateSettings}
+                >
+                  Update Settings
+                </Button>
+              )}
+              {isOwner && (
+                <Button
+                  className="bg-primary text-primary-foreground"
+                  onClick={handleStartPlaying}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-play mr-2"
+                  >
+                    <polygon points="6 3 20 12 6 21 6 3" />
+                  </svg>
+                  Start
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
