@@ -1,0 +1,100 @@
+The WHERE clause filters rows before any groupings are made, while the HAVING clause filters groups after the GROUP BY.
+WHERE is used to filter rows before the aggregation, whereas HAVING is used to filter after aggregation.
+WHERE filters data before it is grouped, but HAVING filters data after groups are created.
+The WHERE clause applies to individual rows, while the HAVING clause applies to groups created by GROUP BY.
+WHERE is used to filter rows that do not meet the condition, while HAVING is used to filter groups of rows after aggregation.
+The WHERE clause cannot be used with aggregate functions, but HAVING can.
+WHERE filters rows before any grouping occurs; HAVING filters after grouping.
+WHERE applies conditions to rows, whereas HAVING applies conditions to groups of rows.
+You use WHERE to filter rows before the aggregation and HAVING to filter the results of the aggregation.
+WHERE clause filters rows of data; HAVING clause filters aggregated groups.
+The WHERE clause is used before GROUP BY, but HAVING is used after GROUP BY.
+WHERE cannot filter on aggregates, but HAVING can.
+WHERE filters individual rows, while HAVING filters the groups of rows.
+The WHERE clause restricts the rows returned, and the HAVING clause restricts the groups returned.
+You use WHERE for row conditions and HAVING for conditions on aggregated data.
+WHERE is used to filter records before grouping; HAVING is used to filter after grouping.
+The WHERE clause is for filtering records, while HAVING is for filtering aggregated results.
+WHERE applies to rows, and HAVING applies to the results of GROUP BY.
+WHERE filters rows; HAVING filters groups.
+The WHERE clause is used for row-level filtering, HAVING is used for group-level filtering.
+WHERE can be used without GROUP BY, HAVING must be used with GROUP BY.
+WHERE clause filters data before aggregation; HAVING filters after.
+You use WHERE to filter rows and HAVING to filter grouped data.
+WHERE is used before data is grouped; HAVING is used after data is grouped.
+The WHERE clause can't filter aggregate data, but HAVING can.
+WHERE filters rows; HAVING filters groups created by GROUP BY.
+WHERE applies to raw data, while HAVING applies to aggregated data.
+The WHERE clause is used for filtering individual rows, while HAVING is used for filtering grouped rows.
+WHERE is for pre-grouping filters; HAVING is for post-grouping filters.
+WHERE is used to filter records before they are grouped; HAVING is used after grouping.
+WHERE cannot use aggregate functions; HAVING can.
+WHERE clause filters individual rows, whereas HAVING filters the aggregated results.
+The WHERE clause restricts rows; HAVING restricts groups after aggregation.
+WHERE is used to filter rows before GROUP BY, while HAVING is used after GROUP BY.
+WHERE filters data before aggregation; HAVING filters data after aggregation.
+WHERE is used for filtering rows, HAVING for filtering groups.
+The WHERE clause is for filtering records before grouping; HAVING is for filtering after.
+WHERE filters rows before any groupings; HAVING filters after grouping.
+WHERE applies to rows and cannot use aggregate functions; HAVING applies to groups and can.
+WHERE filters data before it's grouped; HAVING filters groups after aggregation.
+The WHERE clause is used to filter individual rows, while HAVING is used to filter groups of rows.
+WHERE is used to filter rows before the GROUP BY clause; HAVING is used after GROUP BY.
+WHERE cannot filter on aggregated data; HAVING can.
+WHERE filters rows before grouping, HAVING filters after.
+The WHERE clause filters rows, and the HAVING clause filters groups.
+WHERE applies conditions to rows; HAVING applies conditions to groups.
+You use WHERE to filter individual records; HAVING to filter aggregated results.
+WHERE is for filtering data before aggregation; HAVING is for after.
+WHERE filters rows, and HAVING filters the results of GROUP BY.
+The WHERE clause is used before GROUP BY; HAVING is used after.
+WHERE cannot filter aggregates, but HAVING can.
+WHERE applies to rows; HAVING applies to groups.
+You use WHERE for row conditions, HAVING for group conditions.
+WHERE is used to filter rows before grouping; HAVING is used after.
+The WHERE clause filters records; HAVING filters aggregated results.
+WHERE applies to raw data; HAVING applies to grouped data.
+WHERE filters rows; HAVING filters groups created by GROUP BY.
+The WHERE clause is for row-level filtering; HAVING is for group-level filtering.
+WHERE can be used alone; HAVING must follow GROUP BY.
+WHERE filters data before grouping; HAVING filters after.
+You use WHERE to filter rows and HAVING to filter groups.
+WHERE is used before data is grouped; HAVING is used after.
+The WHERE clause can't filter aggregates, but HAVING can.
+WHERE filters individual rows; HAVING filters groups.
+WHERE applies to raw data, while HAVING applies to aggregated data.
+The WHERE clause is for filtering rows, while HAVING is for filtering grouped rows.
+WHERE is for pre-grouping filters; HAVING is for post-grouping filters.
+WHERE is used to filter records before grouping; HAVING is used after grouping.
+WHERE cannot use aggregate functions; HAVING can.
+WHERE clause filters individual rows, whereas HAVING filters aggregated results.
+The WHERE clause restricts rows; HAVING restricts groups after aggregation.
+WHERE is used before GROUP BY; HAVING is used after GROUP BY.
+WHERE filters data before aggregation; HAVING filters data after aggregation.
+WHERE is for filtering rows; HAVING is for filtering groups.
+The WHERE clause is for filtering records before grouping; HAVING is for filtering after.
+WHERE filters rows before any groupings; HAVING filters after grouping.
+WHERE applies to rows and cannot use aggregates; HAVING applies to groups and can.
+WHERE filters data before grouping; HAVING filters groups after aggregation.
+The WHERE clause filters individual rows, while HAVING filters groups of rows.
+WHERE is used to filter rows before the GROUP BY clause; HAVING is used after GROUP BY.
+WHERE cannot filter on aggregated data; HAVING can.
+WHERE filters rows before grouping; HAVING filters after.
+The WHERE clause filters rows, and the HAVING clause filters groups.
+WHERE applies conditions to rows; HAVING applies conditions to groups.
+You use WHERE to filter individual records; HAVING to filter aggregated results.
+WHERE is for filtering data before aggregation; HAVING is for after.
+WHERE filters rows, and HAVING filters the results of GROUP BY.
+The WHERE clause is used before GROUP BY; HAVING is used after.
+WHERE cannot filter aggregates, but HAVING can.
+WHERE applies to rows; HAVING applies to groups.
+You use WHERE for row conditions, HAVING for group conditions.
+WHERE is used to filter rows before grouping; HAVING is used after.
+The WHERE clause filters records; HAVING filters aggregated results.
+WHERE applies to raw data; HAVING applies to grouped data.
+WHERE filters rows; HAVING filters groups created by GROUP BY.
+The WHERE clause is for row-level filtering; HAVING is for group-level filtering.
+WHERE can be used alone; HAVING must follow GROUP BY.
+WHERE filters data before grouping; HAVING filters after.
+You use WHERE to filter rows and HAVING to filter groups.
+WHERE is used before data is grouped; HAVING is used after.
