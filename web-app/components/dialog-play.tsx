@@ -30,6 +30,10 @@ export default function PlayDialog() {
 
   const handleCreateRoom = async () => {
     const user = auth.currentUser;
+    if (userName.trim() === "") {
+      console.log("User name is required");
+      return;
+    }
     if (user) {
       try {
         const roomId = await createRoom(roomName, roomPassword, user.uid);
@@ -112,6 +116,7 @@ export default function PlayDialog() {
                     placeholder="Input your name"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
+                    required
                   />
                 </div>
               </CardContent>

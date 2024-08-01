@@ -150,8 +150,18 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
 
     const roomData = roomDocSnap.data();
 
+    if (!roomData) {
+      console.log('No room data found!');
+      return;
+    }
+
+    // Remove the player from the players collection
+    const playersCollectionRef = collection(db, 'Rooms', roomId, 'Players');
+    const playerDocRef = doc(playersCollectionRef, userId);
+    await deleteDoc(playerDocRef);
+    console.log(`User ${userId} left room ${roomId}`);
+
     // Check if the leaving user is the owner
-    const playersCollectionRef = collection(roomDocRef, 'Players');
     if (roomData.ownerId === userId) {
       const playersSnapshot = await getDocs(playersCollectionRef);
 
@@ -159,7 +169,6 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
         // If there are no other players, delete the room
         await deleteDoc(roomDocRef);
         console.log(`Room ${roomId} deleted as there are no players left.`);
-        return;
       } else {
         // Assign the next player as the owner
         const nextPlayer = playersSnapshot.docs[0];
@@ -167,11 +176,6 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
         console.log(`Ownership transferred to user ${nextPlayer.id}`);
       }
     }
-
-    // Remove the player from the players collection
-    const playerDocRef = doc(playersCollectionRef, userId);
-    await deleteDoc(playerDocRef);
-    console.log(`User ${userId} left room ${roomId}`);
   } catch (e) {
     console.error('Error leaving room: ', e);
   }

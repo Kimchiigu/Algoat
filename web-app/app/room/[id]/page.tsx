@@ -50,7 +50,6 @@ const RoomPage = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [messageInput, setMessageInput] = useState("");
-  const [user, setUser] = useState<any | null>(null);
   const [topic, setTopic] = useState("Data Structure");
   const [numQuestions, setNumQuestions] = useState(10);
   const [answerTime, setAnswerTime] = useState(5);
@@ -71,9 +70,9 @@ const RoomPage = () => {
   }, [id, router, currentUser]);
 
   const handleLeaveRoom = async () => {
-    if (user && typeof id === "string") {
-      await leaveRoom(id, user.uid);
-      router.push("/");
+    if (currentUser) {
+      await leaveRoom(id as string, currentUser.id);
+      router.push("/home");
     }
   };
 
@@ -129,7 +128,7 @@ const RoomPage = () => {
           ))}
         </ul>
         <Button
-          className="mt-4 bg-destructive text-destructive-foreground"
+          className="mt-4 bg-destructive hover:bg-destructive/70 text-destructive-foreground"
           onClick={handleLeaveRoom}
         >
           Leave Room
@@ -158,7 +157,7 @@ const RoomPage = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="numQuestions" className="text-secondary">
+              <Label htmlFor="numQuestions" className="text-primary">
                 Number of Questions
               </Label>
               {isOwner ? (
@@ -182,7 +181,7 @@ const RoomPage = () => {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="answerTime" className="text-secondary">
+              <Label htmlFor="answerTime" className="text-primary">
                 Answer Time (in minutes)
               </Label>
               {isOwner ? (
