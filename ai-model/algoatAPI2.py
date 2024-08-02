@@ -67,8 +67,12 @@ class JudgementResponse(BaseModel):
     Answers: List[ScoreResponse]
     winner: str
 
+class LeaderboardEntry(BaseModel):
+    player: str
+    score: int  # Updated to expect an integer
+
 class LeaderboardResponse(BaseModel):
-    leaderboard: List[Dict[str, int]]
+    leaderboard: List[LeaderboardEntry]
 
 # Load the dataset
 def load_dataset(base_path):
@@ -185,6 +189,7 @@ def submit_answer(session_id: str, answer: Answer):
 
     # Store the answer in the Answers sub-collection
     try:
+        db.collection("Games").document(session_id).collection("Answers")
         db.collection("Games").document(session_id).collection("Answers").add(answer_dict)
         print(f"Answer saved successfully: {answer_dict} in {session_id}")
     except Exception as e:
@@ -270,14 +275,24 @@ def calculate_scores(session_id: str):
     current_question = questions[current_question_index]
 
     # Retrieve all Answers for the current round
+    answers = []
     answers_docs = db.collection("Games").document(session_id).collection("Answers").stream()
-    Answers = [Answer(player=doc.to_dict()["player"], username=doc.to_dict()["username"], answer=doc.to_dict()["answer"]) for doc in answers_docs]
+    for doc in answers_docs:
+        doc_data = doc.to_dict()
+        print(f"Fetched answer document: {doc_data}")  # Add logging
+        try:
+            answer = Answer(player=doc_data["player"], username=doc_data["username"], answer=doc_data["answer"])
+            answers.append(answer)
+        except KeyError as e:
+            print(f"KeyError: {e} in document: {doc_data}")
+        except Exception as e:
+            print(f"Unexpected error: {e} in document: {doc_data}")
 
     # Use local dataset for scoring
     category_df = df[df['category'] == current_question['category']].copy()
 
     scores = []
-    for answer in Answers:
+    for answer in answers:
         best_text, best_score = get_best_score(answer.answer, category_df)
         scores.append(ScoreResponse(player=answer.player, username=answer.username, score=best_score))
 
@@ -287,7 +302,8 @@ def calculate_scores(session_id: str):
         winner = winner_score.username
 
         # Increment the winner's score
-        participant_doc_ref = db.collection("Games").document(session_id).collection("Participants").document(winner_score.player)
+        print(winner_score.player)
+        participant_doc_ref = db.collection("Games").document(session_id).collection("Participants").document(winner_score.username)
         participant_doc = participant_doc_ref.get()
         if participant_doc.exists:
             participant_data = participant_doc.to_dict()
@@ -318,7 +334,7 @@ def calculate_scores(session_id: str):
 def get_leaderboard(session_id: str):
     participants_ref = db.collection("Games").document(session_id).collection("Participants")
     participants_docs = participants_ref.stream()
-    leaderboard = [{"player": doc.id, "score": doc.to_dict()["score"]} for doc in participants_docs]
+    leaderboard = [{"player": doc.to_dict()["player"], "score": doc.to_dict()["score"]} for doc in participants_docs]
 
     leaderboard.sort(key=lambda x: x["score"], reverse=True)  # Sort by score in descending order
     return LeaderboardResponse(leaderboard=leaderboard)

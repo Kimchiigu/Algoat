@@ -110,7 +110,7 @@ const PlayPage = () => {
         if (playersList.length > 0) {
           const { data } = await axios.post("/start_game", {
             room_id: id as string,
-            participants: playersList?.map((player) => player.userId),
+            participants: playersList?.map((player) => player.userName),
           });
           setSessionId(data.session_id);
           await updateDoc(roomDocRef, { sessionId: data.session_id });
@@ -151,10 +151,10 @@ const PlayPage = () => {
         } else if (data.status === "judging") {
           setPhase("judging");
           console.log("judging");
-        } else if (phase === "leaderboard") {
+        } else if (data.status === "leaderboard") {
+          console.log("leaderboard");
           setPhase("leaderboard");
           fetchLeaderboard(sessionId);
-          console.log("leaderboard");
         } else if (data.status === "ended") {
           setPhase("ended");
           setMessage(`Game Over`);
