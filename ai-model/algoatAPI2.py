@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
@@ -45,7 +46,12 @@ app.add_middleware(
 
 class Answer(BaseModel):
     player: str
+    username: str
     answer: str
+
+class StartGameRequest(BaseModel):
+    room_id: str
+    participants: List[str]
 
 class QuestionResponse(BaseModel):
     question: str
@@ -53,12 +59,16 @@ class QuestionResponse(BaseModel):
 
 class ScoreResponse(BaseModel):
     player: str
+    username: str
     score: float
 
 class JudgementResponse(BaseModel):
     question: str
-    answers: List[ScoreResponse]
+    Answers: List[ScoreResponse]
     winner: str
+
+class LeaderboardResponse(BaseModel):
+    leaderboard: List[Dict[str, int]]
 
 # Load the dataset
 def load_dataset(base_path):
@@ -125,21 +135,33 @@ base_path = 'Dataset'  # Replace with your actual dataset path
 df = load_dataset(base_path)
 
 @app.post("/start_game")
-def start_game():
+def start_game(request: StartGameRequest):
     session_id = str(uuid.uuid4())
     questions = df.sample(frac=1).to_dict(orient="records")
-    db.collection("games").document(session_id).set({
+    participants = [{"player": p, "score": 0} for p in request.participants]
+    
+    db.collection("Games").document(session_id).set({
+        "room_id": request.room_id,
         "questions": [{ "question": q["question"], "category": q["category"] } for q in questions],  # Only save necessary info
         "current_question_index": 0,
         "scores": {},
         "is_playing": True,
+        "phase": "question",  # Initial phase
+        "phase_start_time": datetime.now().isoformat(),
+        "participants": participants,
         "timer": 5
     })
+    
+    # Save participants in a sub-collection
+    for participant in participants:
+        db.collection("Games").document(session_id).collection("Participants").document(participant["player"]).set(participant)
+    
     return {"session_id": session_id}
+
 
 @app.get("/get_question/{session_id}", response_model=QuestionResponse)
 def get_question(session_id: str):
-    game_doc = db.collection("games").document(session_id).get()
+    game_doc = db.collection("Games").document(session_id).get()
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -153,9 +175,88 @@ def get_question(session_id: str):
     question = questions[current_question_index]["question"]
     return QuestionResponse(question=question, timer=5)
 
-@app.post("/submit_answers/{session_id}", response_model=JudgementResponse)
-def submit_answers(session_id: str, answers: List[Answer]):
-    game_doc = db.collection("games").document(session_id).get()
+@app.post("/submit_answer/{session_id}")
+def submit_answer(session_id: str, answer: Answer):
+    game_doc = db.collection("Games").document(session_id).get()
+    if not game_doc.exists:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    answer_dict = answer.model_dump()
+
+    # Store the answer in the Answers sub-collection
+    try:
+        db.collection("Games").document(session_id).collection("Answers").add(answer_dict)
+        print(f"Answer saved successfully: {answer_dict} in {session_id}")
+    except Exception as e:
+        print(f"Error saving answer: {e}")
+        raise HTTPException(status_code=500, detail="Error saving answer")
+
+    # Update the count of submitted Answers
+    game_data = game_doc.to_dict()
+    current_count = game_data.get("submitted_answers", 0) + 1
+    db.collection("Games").document(session_id).update({"submitted_answers": current_count})
+    
+@app.post("/check_game_state/{session_id}")
+def check_game_state(session_id: str):
+    game_doc = db.collection("Games").document(session_id).get()
+    if not game_doc.exists:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    game_data = game_doc.to_dict()
+    if not game_data["is_playing"]:
+        return {"status": "ended"}
+
+    current_time = datetime.now()
+    phase_start_time = datetime.fromisoformat(game_data["phase_start_time"])
+
+    if game_data["phase"] == "question":
+        if (current_time - phase_start_time).seconds >= 10:
+            db.collection("Games").document(session_id).update({
+                "phase": "answer",
+                "phase_start_time": current_time.isoformat()
+            })
+            return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"]}
+
+    elif game_data["phase"] == "answer":
+        if (current_time - phase_start_time).seconds >= 15:
+            calculate_scores(session_id)
+            db.collection("Games").document(session_id).update({
+                "phase": "judging",
+                "phase_start_time": current_time.isoformat()
+            })
+            return {"status": "judging"}
+
+    elif game_data["phase"] == "judging":
+        if (current_time - phase_start_time).seconds >= 5:
+            next_question_index = game_data["current_question_index"] + 1
+            if next_question_index < len(game_data["questions"]):
+                db.collection("Games").document(session_id).update({
+                    "phase": "leaderboard",
+                    "phase_start_time": current_time.isoformat()
+                })
+                return {"status": "leaderboard"}
+            else:
+                db.collection("Games").document(session_id).update({
+                    "is_playing": False
+                })
+                return {"status": "ended"}
+    
+    elif game_data["phase"] == "leaderboard":
+        if (current_time - phase_start_time).seconds >= 10:  # Show leaderboard for 10 seconds
+            next_question_index = game_data["current_question_index"]
+            if next_question_index < len(game_data["questions"]):
+                db.collection("Games").document(session_id).update({
+                    "phase": "question",
+                    "phase_start_time": current_time.isoformat()
+                })
+                return {"status": "question"}
+
+    return {"status": game_data["phase"]}
+
+
+@app.post("/calculate_scores/{session_id}", response_model=JudgementResponse)
+def calculate_scores(session_id: str):
+    game_doc = db.collection("Games").document(session_id).get()
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -167,42 +268,74 @@ def submit_answers(session_id: str, answers: List[Answer]):
         raise HTTPException(status_code=400, detail="No question has been fetched yet")
 
     current_question = questions[current_question_index]
-    
+
+    # Retrieve all Answers for the current round
+    answers_docs = db.collection("Games").document(session_id).collection("Answers").stream()
+    Answers = [Answer(player=doc.to_dict()["player"], username=doc.to_dict()["username"], answer=doc.to_dict()["answer"]) for doc in answers_docs]
+
     # Use local dataset for scoring
     category_df = df[df['category'] == current_question['category']].copy()
 
     scores = []
-    for answer in answers:
+    for answer in Answers:
         best_text, best_score = get_best_score(answer.answer, category_df)
-        scores.append(ScoreResponse(player=answer.player, score=best_score))
-        game_data["scores"][answer.player] = game_data["scores"].get(answer.player, 0) + best_score
+        scores.append(ScoreResponse(player=answer.player, username=answer.username, score=best_score))
 
-    winner = max(scores, key=lambda x: x.score).player
+    winner = ''
+    if scores:
+        winner_score = max(scores, key=lambda x: x.score)
+        winner = winner_score.username
+
+        # Increment the winner's score
+        participant_doc_ref = db.collection("Games").document(session_id).collection("Participants").document(winner_score.player)
+        participant_doc = participant_doc_ref.get()
+        if participant_doc.exists:
+            participant_data = participant_doc.to_dict()
+            participant_data["score"] += 1
+            participant_doc_ref.update({"score": participant_data["score"]})
+            print(f"Updated score for {winner_score.username}: {participant_data['score']}")
 
     # Update the game session in Firestore
-    db.collection("games").document(session_id).update({
+    db.collection("Games").document(session_id).update({
         "current_question_index": current_question_index + 1,
-        "scores": game_data["scores"]
+        "scores": game_data["scores"],
+        "is_playing": True,
+        "winner": winner
     })
+
+    # Clear the Answers sub-collection for the next round
+    answers_ref = db.collection("Games").document(session_id).collection("Answers")
+    for doc in answers_ref.stream():
+        doc.reference.delete()
 
     return JudgementResponse(
         question=current_question["question"],
-        answers=scores,
+        Answers=scores,
         winner=winner
     )
 
+@app.get("/get_leaderboard/{session_id}", response_model=LeaderboardResponse)
+def get_leaderboard(session_id: str):
+    participants_ref = db.collection("Games").document(session_id).collection("Participants")
+    participants_docs = participants_ref.stream()
+    leaderboard = [{"player": doc.id, "score": doc.to_dict()["score"]} for doc in participants_docs]
+
+    leaderboard.sort(key=lambda x: x["score"], reverse=True)  # Sort by score in descending order
+    return LeaderboardResponse(leaderboard=leaderboard)
+
 @app.post("/end_game/{session_id}")
 def end_game(session_id: str):
-    game_doc = db.collection("games").document(session_id).get()
+    game_doc = db.collection("Games").document(session_id).get()
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    game_data = game_doc.to_dict()
-    final_scores = [{"player": player, "score": score} for player, score in game_data["scores"].items()]
+    participants_ref = db.collection("Games").document(session_id).collection("Participants")
+    participants_docs = participants_ref.stream()
+    final_scores = [{"player": doc.id, "score": doc.to_dict()["score"]} for doc in participants_docs]
     winner = max(final_scores, key=lambda x: x["score"])["player"]
 
     # Delete the game session from Firestore
-    db.collection("games").document(session_id).delete()
+    db.collection("Games").document(session_id).delete()
 
     return {"final_scores": final_scores, "winner": winner}
 
