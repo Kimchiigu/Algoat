@@ -172,7 +172,7 @@ const PlayPage = () => {
         } else if (data.status === "ended") {
           setPhase("ended");
           const data = await axios.post(`/end_game/${sessionId}`);
-          setMessage(`${data}`);
+          setMessage(`Game Ended`);
           const timeoutId = setTimeout(() => {
             router.push(`/room/${id}`);
           }, 5000);

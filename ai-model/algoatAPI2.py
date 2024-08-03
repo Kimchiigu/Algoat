@@ -235,7 +235,7 @@ def check_game_state(session_id: str):
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
-        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
+        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*5):
             calculate_scores(session_id)
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
@@ -255,7 +255,7 @@ def check_game_state(session_id: str):
             return {"status": "leaderboard"}
     
     elif game_data["phase"] == "leaderboard":
-        if (current_time - phase_start_time).seconds >= 10:  # Show leaderboard for 10 seconds
+        if (current_time - phase_start_time).seconds >= 5:  # Show leaderboard for 10 seconds
             next_question_index = game_data["current_question_index"]
             if next_question_index < len(game_data["questions"]):
                 db.collection("Games").document(session_id).update({
@@ -313,7 +313,7 @@ def calculate_scores(session_id: str):
     if scores:
         winner_score = max(scores, key=lambda x: x.score)
         winner = winner_score.username
-
+        print(winner_score)
         # Increment the winner's score
         print(winner_score.player)
         participant_doc_ref = db.collection("Games").document(session_id).collection("Participants").document(winner_score.username)
