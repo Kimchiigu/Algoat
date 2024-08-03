@@ -371,7 +371,7 @@ def end_game(session_id: str):
     # Delete the game session from Firestore
     db.collection("Games").document(session_id).delete()
 
-    return {"final_scores": final_scores, "winner": winner or "No Winner"}
+    return {"message": "Game Ended"}
 
 # To run the API, use the command: uvicorn script_name:app --reload
 # Replace 'script_name' with the name of your script file
