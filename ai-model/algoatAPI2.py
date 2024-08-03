@@ -52,6 +52,9 @@ class Answer(BaseModel):
 class StartGameRequest(BaseModel):
     room_id: str
     participants: List[str]
+    category: str
+    num_questions: int  # Add num_questions field
+    answer_time: int  # Add answer_time field
 
 class QuestionResponse(BaseModel):
     question: str
@@ -141,7 +144,15 @@ df = load_dataset(base_path)
 @app.post("/start_game")
 def start_game(request: StartGameRequest):
     session_id = str(uuid.uuid4())
-    questions = df.sample(frac=1).to_dict(orient="records")
+    print("Incoming request:", request.model_dump())
+    # Filter the dataset based on the specified category
+    filtered_df = df[df['category'] == request.category]
+    if filtered_df.empty:
+        raise HTTPException(status_code=400, detail="No questions available for the specified category")
+    
+    # Select the specified number of questions
+    questions = filtered_df.sample(n=request.num_questions).to_dict(orient="records")
+    print("soal 2", [{ "question": q["question"], "category": q["category"] } for q in questions])
     participants = [{"player": p, "score": 0} for p in request.participants]
     
     db.collection("Games").document(session_id).set({
@@ -153,7 +164,8 @@ def start_game(request: StartGameRequest):
         "phase": "question",  # Initial phase
         "phase_start_time": datetime.now().isoformat(),
         "participants": participants,
-        "timer": 5
+        "answer_time": request.answer_time,  # Store answer time
+        "num_questions": request.num_questions  # Store number of questions
     })
     
     # Save participants in a sub-collection
@@ -220,31 +232,27 @@ def check_game_state(session_id: str):
                 "phase": "answer",
                 "phase_start_time": current_time.isoformat()
             })
-            return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"]}
+            return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
-        if (current_time - phase_start_time).seconds >= 15:
+        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
             calculate_scores(session_id)
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
                 "phase_start_time": current_time.isoformat()
             })
             return {"status": "judging"}
+        else:
+            return {"status": "answer", "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "judging":
         if (current_time - phase_start_time).seconds >= 5:
             next_question_index = game_data["current_question_index"] + 1
-            if next_question_index < len(game_data["questions"]):
-                db.collection("Games").document(session_id).update({
-                    "phase": "leaderboard",
-                    "phase_start_time": current_time.isoformat()
-                })
-                return {"status": "leaderboard"}
-            else:
-                db.collection("Games").document(session_id).update({
-                    "is_playing": False
-                })
-                return {"status": "ended"}
+            db.collection("Games").document(session_id).update({
+                "phase": "leaderboard",
+                "phase_start_time": current_time.isoformat()
+            })
+            return {"status": "leaderboard"}
     
     elif game_data["phase"] == "leaderboard":
         if (current_time - phase_start_time).seconds >= 10:  # Show leaderboard for 10 seconds
@@ -255,6 +263,11 @@ def check_game_state(session_id: str):
                     "phase_start_time": current_time.isoformat()
                 })
                 return {"status": "question"}
+            else:
+                db.collection("Games").document(session_id).update({
+                    "is_playing": False
+                })
+                return {"status": "ended"}
 
     return {"status": game_data["phase"]}
 
@@ -345,15 +358,20 @@ def end_game(session_id: str):
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    participants_ref = db.collection("Games").document(session_id).collection("Participants")
-    participants_docs = participants_ref.stream()
-    final_scores = [{"player": doc.id, "score": doc.to_dict()["score"]} for doc in participants_docs]
-    winner = max(final_scores, key=lambda x: x["score"])["player"]
+    game_data = game_doc.to_dict()
+    room_id = game_data["room_id"]
+
+    # Update the room document to remove sessionId and set isPlay to false
+    room_doc_ref = db.collection("Rooms").document(room_id)
+    room_doc_ref.update({
+        "sessionId": firestore.DELETE_FIELD,
+        "isPlay": False
+    })
 
     # Delete the game session from Firestore
     db.collection("Games").document(session_id).delete()
 
-    return {"final_scores": final_scores, "winner": winner}
+    return {"final_scores": final_scores, "winner": winner or "No Winner"}
 
 # To run the API, use the command: uvicorn script_name:app --reload
 # Replace 'script_name' with the name of your script file

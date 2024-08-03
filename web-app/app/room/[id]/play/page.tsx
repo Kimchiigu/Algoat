@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "@/lib/axiosConfig";
@@ -19,7 +19,7 @@ import useUserStore from "@/lib/user-store";
 
 interface QuestionResponse {
   question: string;
-  timer: number;
+  phaseTime: any;
 }
 
 interface Answer {
@@ -58,10 +58,12 @@ interface LeaderboardResponse {
 
 const PlayPage = () => {
   const { id } = useParams();
+  const router = useRouter();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [question, setQuestion] = useState<string | null>(null);
   const [answer, setAnswer] = useState<string>("");
-  const [timer, setTimer] = useState<number>(0);
+  const [timer, setTimer] = useState<number>(9999);
+  const [startTime, setStartTime] = useState<any>();
   const [phase, setPhase] = useState<
     "question" | "answer" | "judging" | "ended" | "leaderboard"
   >("question");
@@ -71,6 +73,7 @@ const PlayPage = () => {
     { player: string; score: number }[]
   >([]);
   const { currentUser } = useUserStore();
+  const [answerTime, setAnswerTime] = useState(1);
 
   // Get the room data
   const [roomData, setRoomData] = useState(null);
@@ -101,6 +104,13 @@ const PlayPage = () => {
       const playersCollectionRef = collection(roomDocRef, "Players");
       const playersSnapshot = await getDocs(playersCollectionRef);
       const playersList = playersSnapshot.docs.map((doc) => doc.data());
+      const roomData = roomDoc.data();
+      const category = roomData?.topic;
+
+      const numQuestions = roomData?.numQuestions || 5; // Default number of questions
+      setAnswerTime(roomData?.answerTime || 1); // Default answer time
+      console.log(id as string);
+      console.log(answerTime);
       if (roomDoc.exists() && roomDoc.data()?.sessionId) {
         const sessionId = roomDoc.data().sessionId;
         setSessionId(sessionId);
@@ -111,7 +121,11 @@ const PlayPage = () => {
           const { data } = await axios.post("/start_game", {
             room_id: id as string,
             participants: playersList?.map((player) => player.userName),
+            category: category,
+            num_questions: numQuestions,
+            answer_time: answerTime,
           });
+          setStartTime(data?.phase_start_time);
           setSessionId(data.session_id);
           await updateDoc(roomDocRef, { sessionId: data.session_id });
           fetchQuestion(data.session_id);
@@ -127,8 +141,8 @@ const PlayPage = () => {
       const { data } = await axios.get<QuestionResponse>(
         `/get_question/${session_id}`
       );
+      setStartTime(data?.phaseTime);
       setQuestion(data.question);
-      setTimer(data.timer);
       setPhase("question");
     } catch (error) {
       console.error("Error fetching question:", error);
@@ -157,9 +171,15 @@ const PlayPage = () => {
           fetchLeaderboard(sessionId);
         } else if (data.status === "ended") {
           setPhase("ended");
-          setMessage(`Game Over`);
+          const data = await axios.post(`/end_game/${sessionId}`);
+          setMessage(`${data}`);
+          const timeoutId = setTimeout(() => {
+            router.push(`/room/${id}`);
+          }, 5000);
+          return () => clearTimeout(timeoutId);
         }
         // Update current question index
+        setStartTime(data?.phaseTime);
         const gameDoc = await getDoc(doc(db, "Games", sessionId));
         if (gameDoc.exists()) {
           const gameData = gameDoc.data();
@@ -213,20 +233,21 @@ const PlayPage = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (timer > 0) {
-  //     const timeoutId = setTimeout(() => {
-  //       const newTimer = timer - 1;
-  //       setTimer(newTimer);
-  //     }, 1000);
-  //     return () => clearTimeout(timeoutId);
-  //   } else if (timer === 0 && phase === "question") {
-  //     setPhase("answer");
-  //     setTimer(60); // Set to answer time from settings
-  //   } else if (timer === 0 && phase === "answer") {
-  //     lockAnswer();
-  //   }
-  // }, [timer, phase, sessionId]);
+  useEffect(() => {
+    const currentTime = new Date();
+    if (!startTime) return;
+    console.log(startTime);
+    if (timer > 0) {
+      const timeoutId = setTimeout(() => {
+        const newTimer = Math.round(
+          answerTime * 60 -
+            (currentTime.getTime() - new Date(startTime).getTime()) / 1000
+        );
+        setTimer(newTimer);
+      }, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [timer, phase]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">

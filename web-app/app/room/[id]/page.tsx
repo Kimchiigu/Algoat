@@ -55,7 +55,7 @@ const RoomPage = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [user, setUser] = useState<any | null>(null);
-  const [topic, setTopic] = useState("Data Structure");
+  const [topic, setTopic] = useState("Algorithm and Data Structure");
   const [numQuestions, setNumQuestions] = useState(10);
   const [answerTime, setAnswerTime] = useState(5);
   const { currentUser } = useUserStore();
@@ -168,9 +168,11 @@ const RoomPage = () => {
                   <SelectValue>{topic}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Data Structure">Data Structure</SelectItem>
-                  <SelectItem value="Algorithms">Algorithms</SelectItem>
-                  <SelectItem value="Database">Database</SelectItem>
+                  <SelectItem value="Algorithm and Data Structure">
+                    Algorithm and Data Structure
+                  </SelectItem>
+                  <SelectItem value="Algorithms">Database</SelectItem>
+                  <SelectItem value="Database">Design Pattern</SelectItem>
                 </SelectContent>
               </Select>
             ) : (
