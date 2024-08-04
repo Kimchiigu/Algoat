@@ -375,3 +375,4 @@ def end_game(session_id: str):
 
 # To run the API, use the command: uvicorn script_name:app --reload
 # Replace 'script_name' with the name of your script file
+# uvicorn algoatAPI2:app --reload

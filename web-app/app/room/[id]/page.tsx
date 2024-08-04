@@ -171,8 +171,8 @@ const RoomPage = () => {
                   <SelectItem value="Algorithm and Data Structure">
                     Algorithm and Data Structure
                   </SelectItem>
-                  <SelectItem value="Algorithms">Database</SelectItem>
-                  <SelectItem value="Database">Design Pattern</SelectItem>
+                  <SelectItem value="Database">Database</SelectItem>
+                  <SelectItem value="Design Pattern">Design Pattern</SelectItem>
                 </SelectContent>
               </Select>
             ) : (
