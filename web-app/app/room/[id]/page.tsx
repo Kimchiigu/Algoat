@@ -12,13 +12,7 @@ import {
   startPlaying,
 } from "@/controller/room-controller";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,6 +28,7 @@ import { db } from "@/firebase";
 import { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import Particles from "react-tsparticles";
+import { Lightbulb } from "lucide-react";
 
 interface RoomData {
   name: string;
@@ -68,6 +63,29 @@ const particlesOptions = {
   },
 };
 
+const tips = [
+  "Break problems into smaller pieces.",
+  "Practice coding every day.",
+  "Read code written by others.",
+  "Work on real projects.",
+  "Learn to use version control systems.",
+  "Understand algorithms and data structures.",
+  "Participate in coding challenges.",
+  "Write clean and readable code.",
+  "Debug your code regularly.",
+  "Keep up with new technologies.",
+  "Document your code.",
+  "Use meaningful variable names.",
+  "Optimize your code for performance.",
+  "Collaborate with other developers.",
+  "Test your code thoroughly.",
+  "Learn multiple programming languages.",
+  "Stay curious and keep learning.",
+  "Read programming books and blogs.",
+  "Follow best practices and coding standards.",
+  "Build a portfolio of your projects.",
+];
+
 const RoomPage = () => {
   const router = useRouter();
   const { id } = useParams();
@@ -80,6 +98,7 @@ const RoomPage = () => {
   const [numQuestions, setNumQuestions] = useState(10);
   const [answerTime, setAnswerTime] = useState(5);
   const { currentUser } = useUserStore();
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
   useEffect(() => {
     handleRoomLifecycle(
@@ -103,7 +122,15 @@ const RoomPage = () => {
       }
     });
 
-    return () => unsubscribe();
+    // Tip rotation logic
+    const tipInterval = setInterval(() => {
+      setCurrentTipIndex((prevIndex) => (prevIndex + 1) % tips.length);
+    }, 10000); // 10 seconds
+
+    return () => {
+      unsubscribe();
+      clearInterval(tipInterval);
+    };
   }, [id, router, currentUser]);
 
   const handleLeaveRoom = async () => {
@@ -150,9 +177,9 @@ const RoomPage = () => {
       <div className="flex w-full p-4 space-x-6 bg-gradient text-foreground h-screen">
         {/* Participants Section */}
         <div className="flex flex-col justify-between p-4 bg-gray-400/20 backdrop-blur-sm rounded-lg shadow-md w-1/4">
-          <div>
+          <div className="flex flex-col h-full">
             <h2 className="text-xl font-bold mb-2">Participants</h2>
-            <ul className="space-y-2 mt-5 flex flex-col justify-start">
+            <ul className="flex-1 overflow-auto space-y-2 bg-gray-600/20 backdrop-blur-sm p-2 rounded-md border border-border">
               {players
                 .filter((player) => player.userId === roomData.ownerId)
                 .concat(
@@ -200,7 +227,7 @@ const RoomPage = () => {
         </div>
 
         {/* Room Settings Section */}
-        <div className="flex flex-col z-50 p-4 bg-gray-400/20 backdrop-blur-sm rounded-lg shadow-md w-1/2 border-r border-border">
+        <div className="flex flex-col justify-between z-50 p-4 bg-gray-400/20 backdrop-blur-sm rounded-lg shadow-md w-1/2 border-r border-border">
           <Card className="bg-gray-700/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-primary mb-5">Room Settings</CardTitle>
@@ -309,6 +336,16 @@ const RoomPage = () => {
               </div>
             </CardContent>
           </Card>
+          <img
+            src="/space-goat.gif"
+            width="100"
+            height="200"
+            className="transparent-iframe"
+          />
+          <p className="font-semibold text-center w-full items-center justify-center flex flex-row mb-4">
+            <Lightbulb className="mr-2" />
+            {tips[currentTipIndex]}
+          </p>
         </div>
 
         {/* Chat Section */}
@@ -328,6 +365,11 @@ const RoomPage = () => {
                 placeholder="Type your message"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSendMessage();
+                  }
+                }}
                 className="flex-1 bg-gray-700/20 backdrop-blur-sm"
               />
               <Button

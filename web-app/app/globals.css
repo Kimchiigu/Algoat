@@ -114,3 +114,31 @@
     background-position: 0% 50%;
   }
 }
+
+.transparent-iframe {
+  pointer-events: none;
+  background: transparent;
+  position: relative;
+  animation: moveHorizontal 10s linear infinite;
+}
+
+@keyframes moveHorizontal {
+  0% {
+    left: 0;
+    transform: scaleX(1); /* Normal orientation */
+  }
+  49.9% {
+    transform: scaleX(1); /* Normal orientation */
+  }
+  50% {
+    left: calc(100% - 100px); /* Adjust 100px to the width of the iframe */
+    transform: scaleX(-1); /* Flip horizontally */
+  }
+  99.9% {
+    transform: scaleX(-1); /* Keep flipped orientation */
+  }
+  100% {
+    left: 0;
+    transform: scaleX(1); /* Back to normal orientation */
+  }
+}
