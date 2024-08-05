@@ -16,6 +16,19 @@ import {
 import { useParams } from "next/navigation";
 import { fetchRoomData } from "@/controller/room-controller";
 import useUserStore from "@/lib/user-store";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Particles from "react-tsparticles";
+import type { Engine } from "tsparticles-engine";
+import { loadStarsPreset } from "tsparticles-preset-stars";
+import { Textarea } from "@/components/ui/textarea";
 
 interface QuestionResponse {
   question: string;
@@ -79,6 +92,24 @@ const PlayPage = () => {
   const [roomData, setRoomData] = useState(null);
   const [playersList, setPlayersList] = useState<Player[]>([]);
 
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadStarsPreset(engine);
+  }, []);
+
+  const particlesOptions = {
+    preset: "stars",
+    background: {
+      color: {
+        value: "#000",
+      },
+    },
+    particles: {
+      move: {
+        speed: 1,
+      },
+    },
+  };
+
   const fetchData = async () => {
     // Fetch player list and room data
     const unsubscribePlayers = await fetchRoomData(
@@ -107,8 +138,8 @@ const PlayPage = () => {
       const roomData = roomDoc.data();
       const category = roomData?.topic;
 
-      const numQuestions = roomData?.numQuestions || 5; // Default number of questions
-      setAnswerTime(roomData?.answerTime || 1); // Default answer time
+      const numQuestions = roomData?.numQuestions || 5;
+      setAnswerTime(roomData?.answerTime || 1);
       console.log(id as string);
       console.log(answerTime);
       if (roomDoc.exists() && roomDoc.data()?.sessionId) {
@@ -250,71 +281,103 @@ const PlayPage = () => {
   }, [timer, phase]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
-      {phase === "question" && (
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">
-            Round {currentQuestionIndex + 1}
-          </h1>
-          <p className="text-xl">{question}</p>
-          <p className="text-sm">Read the question carefully</p>
-          <div className="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary"
-              style={{ width: `${(timer / 10) * 100}%` }}
-            ></div>
+    <div className="relative w-full min-h-screen">
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
+      <div className="flex flex-col w-full relative items-center justify-center h-screen">
+        {phase === "question" && (
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-4xl font-bold">
+              Round {currentQuestionIndex + 1}
+            </h1>
+            <p className="text-xl">{question}</p>
+            <p className="text-sm">Read the question carefully</p>
+            <div className="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${(timer / 10) * 100}%` }}
+              ></div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {phase === "answer" && (
-        <div className="text-center w-full max-w-2xl p-4">
-          <div className="flex justify-between">
-            <div>Round {currentQuestionIndex + 1}</div>
-            <div>Timer: {timer}s</div>
-          </div>
-          <p className="text-xl mb-4">{question}</p>
-          <textarea
-            className="w-full p-2 border rounded"
-            placeholder="Type your answer here..."
-            onChange={(e) => setAnswer(e.target.value)}
-          ></textarea>
-          <Button
-            className="mt-4 bg-primary text-primary-foreground"
-            onClick={lockAnswer}
+        {phase === "answer" && (
+          <div
+            className="text-center w-full max-w-2xl p-4"
+            style={{
+              backdropFilter: "blur(1px)",
+              backgroundColor: "rgba(255, 255, 255, 0.25)",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              borderRadius: "16px",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+            }}
           >
-            Lock Answer
-          </Button>
-        </div>
-      )}
+            <div className="flex justify-between">
+              <div>Round {currentQuestionIndex + 1}</div>
+              <div>Timer: {timer}s</div>
+            </div>
+            <p className="text-xl mb-4">{question}</p>
+            <Textarea
+              className="w-full p-2 border rounded h-56"
+              placeholder="Type your answer here..."
+            ></Textarea>
+            <Button
+              className="mt-4 bg-primary text-primary-foreground"
+              onClick={lockAnswer}
+            >
+              Lock Answer
+            </Button>
+          </div>
+        )}
 
-      {phase === "judging" && (
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Judging...</h1>
-          <p className="text-xl">Algoat is Judging...</p>
-          <p>{message}</p>
-        </div>
-      )}
+        {phase === "judging" && (
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-4xl font-bold">Judging...</h1>
+            <p className="text-xl">Algoat is Judging...</p>
+            <p>{message}</p>
+          </div>
+        )}
 
-      {phase === "leaderboard" && (
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Leaderboard</h1>
-          <ul>
-            {leaderboard.map((player, index) => (
-              <li key={index}>
-                {player.player}: {player.score}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {phase === "leaderboard" && (
+          <div className="text-center">
+            <h1 className="text-4xl font-bold">Leaderboard</h1>
+            <Table className="bg-gray-300/20 backdrop-blur-sm rounded-lg">
+              <TableHeader className="">
+                <TableRow>
+                  <TableHead className="text-xl text-left px-32">
+                    Player
+                  </TableHead>
+                  <TableHead className="text-xl text-left px-12">
+                    Score
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {leaderboard.map((player, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="text-lg text-left">
+                      {player.player}
+                    </TableCell>
+                    <TableCell className="text-lg text-left">
+                      {player.score}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
-      {phase === "ended" && (
-        <div className="text-center">
-          <h1 className="text-4xl font-bold">Game Over</h1>
-          <p className="text-xl">{message}</p>
-        </div>
-      )}
+        {phase === "ended" && (
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-4xl font-bold">Game Over</h1>
+            <p className="text-xl">{message}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
