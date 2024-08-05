@@ -1,5 +1,5 @@
-import { UserStoreState } from "@/components/model/user-store-state-model";
-import { User } from "@/components/model/user-model";
+import { UserStoreState } from "@/model/user-store-state-model";
+import { User } from "@/model/user-model";
 import { db } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { create } from "zustand";

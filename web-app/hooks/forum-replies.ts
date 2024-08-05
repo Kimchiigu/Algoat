@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { doc, onSnapshot, Timestamp } from "firebase/firestore";
-import { Reply } from "@/components/model/reply-model";
+import { Reply } from "@/model/reply-model";
 
 export const useForumReplies = (forumId: string | undefined) => {
   const [replies, setReplies] = useState<Reply[]>([]);

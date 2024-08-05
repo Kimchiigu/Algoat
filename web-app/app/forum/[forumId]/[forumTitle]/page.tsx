@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { handleFile, sendReply } from "@/controller/forum-controller";
 import { toast } from "@/components/ui/use-toast";
 import useUserStore from "@/lib/user-store";
-import { FileState } from "@/components/model/file-state-model";
+import { FileState } from "@/model/file-state-model";
 import { LinkIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useDropzone } from "react-dropzone";

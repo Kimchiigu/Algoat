@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { doc, getDoc, Timestamp } from "firebase/firestore";
-import { Forum } from "@/components/model/forum-model";
+import { Forum } from "@/model/forum-model";
 
 export const useFetchForumDetail = (forumId: string | undefined) => {
   const [forum, setForum] = useState<Forum | null>(null);

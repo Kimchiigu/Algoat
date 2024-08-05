@@ -1,6 +1,6 @@
-import { FileState } from "@/components/model/file-state-model";
-import { Forum } from "@/components/model/forum-model";
-import { User } from "@/components/model/user-model";
+import { FileState } from "@/model/file-state-model";
+import { Forum } from "@/model/forum-model";
+import { User } from "@/model/user-model";
 import { db } from "@/firebase";
 import upload from "@/lib/upload";
 import {
