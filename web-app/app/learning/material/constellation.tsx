@@ -151,11 +151,11 @@ const nodePositions = [
 ];
 
 const icons = [
-  <Box size={30} color="#fff" />,
-  <CodeXml size={30} color="#fff" />,
-  <Puzzle size={30} color="#fff" />,
-  <Cpu size={30} color="#fff" />,
-  <PenTool size={30} color="#fff" />,
+  <Box size={30} color="#fff" key="icon-0" />,
+  <CodeXml size={30} color="#fff" key="icon-1" />,
+  <Puzzle size={30} color="#fff" key="icon-2" />,
+  <Cpu size={30} color="#fff" key="icon-3" />,
+  <PenTool size={30} color="#fff" key="icon-4" />,
 ];
 
 const nodeTitles = [
