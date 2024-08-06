@@ -1,4 +1,3 @@
-// components/BackgroundAudio.tsx
 "use client";
 
 import { useEffect, useRef } from "react";

@@ -16,10 +16,10 @@ import { Textarea } from "./ui/textarea";
 import { LinkIcon } from "lucide-react";
 import { handleFile, handlePost } from "@/controller/forum-controller";
 import { useState, useRef } from "react";
-import { FileState } from "./model/file-state-model";
 import { toast } from "@/components/ui/use-toast";
 import FilePreview from "./file-preview";
 import useUserStore from "@/lib/user-store";
+import { FileState } from "@/model/file-state-model";
 
 export default function NewForumDialog() {
   const [file, setFile] = useState<FileState | null>(null);

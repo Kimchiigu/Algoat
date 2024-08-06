@@ -1,6 +1,6 @@
 import { FileIcon, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { FileState } from "./model/file-state-model";
+import { FileState } from "@/model/file-state-model";
 
 interface PreviewProps {
   file: FileState;
