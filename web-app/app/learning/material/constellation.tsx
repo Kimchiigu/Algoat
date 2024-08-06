@@ -54,7 +54,12 @@ const pastelColors = [
   { color: "rgb(175, 238, 238)", hoverColor: "rgba(175, 238, 238, 0.5)" }, // pastel cyan
 ];
 
-const Node = styled.div`
+interface NodeProps {
+  completed: boolean;
+  index: number;
+}
+
+const Node = styled.div<NodeProps>`
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -80,7 +85,12 @@ const ProgressLabel = styled.div`
   font-size: 12px;
 `;
 
-const CoreWrapper = styled.div`
+interface CoreWrapperProps {
+  glowIntensity: number;
+  coreColor: string;
+}
+
+const CoreWrapper = styled.div<CoreWrapperProps>`
   position: absolute;
   width: 100px;
   height: 100px;
@@ -105,7 +115,12 @@ const HoverCardContentStyled = styled(HoverCardContent)`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 `;
 
-const Line = styled.line`
+interface LineProps {
+  completed: boolean;
+  index: number;
+}
+
+const Line = styled.line<LineProps>`
   stroke: ${(props) =>
     props.completed ? pastelColors[props.index].color : "#555"};
   stroke-width: 2;
