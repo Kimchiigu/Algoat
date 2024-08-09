@@ -1,6 +1,5 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
 import { useCallback } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
@@ -109,23 +108,16 @@ export default function RankingPage() {
         init={particlesInit}
         options={particlesOptions}
       />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <div className="flex flex-col min-h-screen items-center justify-start py-10">
-          <GoBack href="/learning" />
-          <h2 className="scroll-m-20 border-b mb-2 pb-2 text-5xl font-semibold tracking-tight first:mt-0 z-[999]">
-            AlgoatRanking WorldWide
-          </h2>
-          <p className="z-[999] mb-5">
-            Are you one of the GOAT of all Algoaters? Find out here!
-          </p>
-          <RankingTable />
-        </div>
-      </ThemeProvider>
+      <div className="flex flex-col min-h-screen items-center justify-start py-10">
+        <GoBack href="/learning" />
+        <h2 className="scroll-m-20 border-b mb-2 pb-2 text-5xl font-semibold tracking-tight first:mt-0 z-[999]">
+          AlgoatRanking WorldWide
+        </h2>
+        <p className="z-[999] mb-5">
+          Are you one of the GOAT of all Algoaters? Find out here!
+        </p>
+        <RankingTable />
+      </div>
     </div>
   );
 }

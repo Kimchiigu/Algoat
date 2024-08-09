@@ -1,6 +1,5 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
 import { useCallback, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
@@ -79,43 +78,36 @@ export default function MaterialPage() {
         init={particlesInit}
         options={particlesOptions}
       />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <GoBack href="/learning/material" />
-        <div className="flex flex-col items-center justify-center">
-          <h2 className="scroll-m-20 border-b mb-5 pb-2 text-5xl font-semibold tracking-tight first:mt-0 z-[999]">
-            Journey to Become AlgoatPro
-          </h2>
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full max-w-7xl" // Adjust the max width of the carousel
-          >
-            <CarouselContent>
-              {cardData.map((card, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-4">
-                    {" "}
-                    {/* Increase padding */}
-                    <HoverCard
-                      imageSrc={card.imageSrc}
-                      title={card.title}
-                      description={card.description}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </div>
-      </ThemeProvider>
+      <GoBack href="/learning/material" />
+      <div className="flex flex-col items-center justify-center">
+        <h2 className="scroll-m-20 border-b mb-5 pb-2 text-5xl font-semibold tracking-tight first:mt-0 z-[999]">
+          Journey to Become AlgoatPro
+        </h2>
+        <Carousel
+          opts={{
+            align: "start",
+          }}
+          className="w-full max-w-7xl" // Adjust the max width of the carousel
+        >
+          <CarouselContent>
+            {cardData.map((card, index) => (
+              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                <div className="p-4">
+                  {" "}
+                  {/* Increase padding */}
+                  <HoverCard
+                    imageSrc={card.imageSrc}
+                    title={card.title}
+                    description={card.description}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      </div>
     </div>
   );
 }
@@ -141,7 +133,9 @@ function HoverCard({ imageSrc, title, description }: CardContentProps) {
         }`}
       />
       <div className="absolute top-0 left-0 right-0 bottom-0 z-10 flex flex-col items-center justify-center bg-black/50 rounded-xl p-5">
-        <h2 className="text-white font-bold text-3xl z-20 mb-3 text-center">{title}</h2>
+        <h2 className="text-white font-bold text-3xl z-20 mb-3 text-center">
+          {title}
+        </h2>
         <p
           className={`text-white text-base z-20 transition-all duration-300 text-center ${
             hovered ? "opacity-100" : "opacity-0"
