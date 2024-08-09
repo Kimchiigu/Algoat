@@ -1,14 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
-import { ThemeProvider } from "next-themes";
 import { useCallback, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import Link from "next/link";
 import GoBack from "@/components/go-back";
+import { createRoom, joinRoom } from "@/controller/room-controller";
+import useUserStore from "@/lib/user-store";
 
 interface HoverCardProps {
   imageSrc: string;
@@ -17,6 +19,9 @@ interface HoverCardProps {
 }
 
 export default function LearningPage() {
+  const router = useRouter();
+  const [password, setPassword] = useState("");
+  const { currentUser } = useUserStore();
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
   }, []);
@@ -35,52 +40,88 @@ export default function LearningPage() {
     },
   };
 
+  const generateRandom = () => {
+    let min = 1000000000;
+    let max = 9999999999;
+    let randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+    return randomNumber;
+  };
+
+  const handleCreateRoom = async () => {
+    try {
+      setPassword(generateRandom().toString());
+      const roomId = await createRoom(
+        currentUser?.username,
+        password,
+        currentUser?.id
+      );
+      handleJoinRoom(roomId.toString(), true);
+    } catch (error) {
+      console.error("Error creating room: ", error);
+    }
+  };
+
+  const handleJoinRoom = async (
+    roomId: string,
+    isCreating: boolean = false
+  ) => {
+    if (currentUser) {
+      const room = await joinRoom(
+        roomId,
+        password,
+        currentUser.id,
+        currentUser.username,
+        isCreating
+      );
+      if (room) {
+        router.push(`/learning/practice/${room}`);
+      } else {
+        console.log("Room not found or incorrect password");
+      }
+    } else {
+      console.log("User not authenticated");
+    }
+  };
+
   return (
-    <div className="flex">
+    <div className="flex flex-col items-center justify-center">
       <Particles
         id="tsparticles"
         init={particlesInit}
         options={particlesOptions}
       />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <div className="flex flex-col items-center min-h-screen justify-center mx-10">
-          <GoBack href="/home" />
-          <h2 className="scroll-m-20 border-b mb-2 pb-2 text-5xl font-semibold tracking-tight first:mt-0 z-[999]">
-            Welcome to AlgoatCamp!
-          </h2>
-          <p className="mb-4 text-white z-[999]">
-            This is the training camp for you who wants to be stronger
-          </p>
-          <div className="flex flex-row justify-around w-full mt-4 gap-5">
-            <Link href={"/learning/practice"} className="w-full">
-              <HoverCard
-                imageSrc="/learning/practice.png"
-                title="Practice"
-                description="Sharpen your skills with practice problems."
-              />
-            </Link>
-            <Link href={"/learning/material"} className="w-full">
-              <HoverCard
-                imageSrc="/learning/material.png"
-                title="Material"
-                description="Learn from a variety of materials available."
-              />
-            </Link>
-            <Link href={"/learning/ranking"} className="w-full">
-              <HoverCard
-                imageSrc="/learning/ranking.png"
-                title="Ranking"
-                description="Track your progress and see how you rank."
-              />
-            </Link>
-          </div>
+      <div className="flex flex-col items-center min-h-screen justify-center mx-10">
+        <GoBack href="/home" />
+        <h2 className="scroll-m-20 border-b mb-2 pb-2 text-5xl font-semibold tracking-tight first:mt-0 z-[999]">
+          Welcome to AlgoatCamp!
+        </h2>
+        <p className="mb-4 text-white z-[999]">
+          This is the training camp for you who wants to be stronger
+        </p>
+        <div className="flex flex-row justify-around w-full mt-4 gap-5">
+          <Link href={""} className="w-full" onClick={handleCreateRoom}>
+            <HoverCard
+              imageSrc="/learning/practice.png"
+              title="Practice"
+              description="Sharpen your skills with practice problems."
+            />
+          </Link>
+          <Link href={"/learning/material"} className="w-full">
+            <HoverCard
+              imageSrc="/learning/material.png"
+              title="Material"
+              description="Learn from a variety of materials available."
+            />
+          </Link>
+          <Link href={"/learning/ranking"} className="w-full">
+            <HoverCard
+              imageSrc="/learning/ranking.png"
+              title="Ranking"
+              description="Track your progress and see how you rank."
+            />
+          </Link>
         </div>
-      </ThemeProvider>
+      </div>
     </div>
   );
 }

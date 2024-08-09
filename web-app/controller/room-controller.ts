@@ -1,5 +1,19 @@
-import { doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, DocumentData, DocumentSnapshot, deleteDoc, getDocs, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebase';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  DocumentData,
+  DocumentSnapshot,
+  deleteDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "@/firebase";
 
 const generateRoomId = async (): Promise<number> => {
   const min = 100000;
@@ -9,7 +23,7 @@ const generateRoomId = async (): Promise<number> => {
 
   while (roomExists) {
     roomId = Math.floor(Math.random() * (max - min + 1)) + min;
-    const roomDocRef = doc(db, 'Rooms', roomId.toString());
+    const roomDocRef = doc(db, "Rooms", roomId.toString());
     const roomDocSnap = await getDoc(roomDocRef);
 
     if (!roomDocSnap.exists()) {
@@ -20,34 +34,44 @@ const generateRoomId = async (): Promise<number> => {
   return roomId;
 };
 
-export const createRoom = async (roomName: string, roomPassword: string, owner: any): Promise<number> => {
+export const createRoom = async (
+  roomName: string | undefined,
+  roomPassword: string,
+  owner: any
+): Promise<number> => {
   try {
     const roomId = await generateRoomId();
-    await setDoc(doc(db, 'Rooms', roomId.toString()), {
+    await setDoc(doc(db, "Rooms", roomId.toString()), {
       ownerId: owner,
       name: roomName,
       password: roomPassword,
       topic: "Algorithm and Data Structure",
       numQuestions: 10,
-      answerTime: 5
+      answerTime: 5,
     });
-    console.log('Room created with ID: ', roomId);
+    console.log("Room created with ID: ", roomId);
     return roomId;
   } catch (e) {
-    console.error('Error adding document: ', e);
+    console.error("Error adding document: ", e);
     throw e;
   }
 };
 
-export const joinRoom = async (roomId: string, roomPassword: string, userId: string, userName: string, isCreating: boolean = false): Promise<string | null> => {
+export const joinRoom = async (
+  roomId: string,
+  roomPassword: string,
+  userId: string,
+  userName: string,
+  isCreating: boolean = false
+): Promise<string | null> => {
   try {
-    const roomDocRef = doc(db, 'Rooms', roomId);
+    const roomDocRef = doc(db, "Rooms", roomId);
     const roomDocSnap = await getDoc(roomDocRef);
 
     if (roomDocSnap.exists()) {
       const roomData = roomDocSnap.data();
       if (isCreating || roomData.password === roomPassword) {
-        const playersCollectionRef = collection(roomDocRef, 'Players');
+        const playersCollectionRef = collection(roomDocRef, "Players");
         const playerDocRef = doc(playersCollectionRef, userId);
 
         const playerDocSnap = await getDoc(playerDocRef);
@@ -59,44 +83,55 @@ export const joinRoom = async (roomId: string, roomPassword: string, userId: str
         }
         return roomId;
       } else {
-        console.log('Incorrect password');
+        console.log("Incorrect password");
         return null;
       }
     } else {
-      console.log('No such room!');
+      console.log("No such room!");
       return null;
     }
   } catch (e) {
-    console.error('Error getting document: ', e);
+    console.error("Error getting document: ", e);
     return null;
   }
 };
 
-export const sendMessage = async (roomId: string, userId: string, message: string) => {
+export const sendMessage = async (
+  roomId: string,
+  userId: string,
+  message: string
+) => {
   try {
-    const messagesCollectionRef = collection(db, 'Rooms', roomId, 'Messages');
+    const messagesCollectionRef = collection(db, "Rooms", roomId, "Messages");
     await addDoc(messagesCollectionRef, {
       userId,
       message,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   } catch (e) {
-    console.error('Error sending message: ', e);
+    console.error("Error sending message: ", e);
   }
 };
 
-export const subscribeToMessages = (roomId: string, callback: (messages: any[]) => void) => {
-  const messagesCollectionRef = collection(db, 'Rooms', roomId, 'Messages');
-  const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
+export const subscribeToMessages = (
+  roomId: string,
+  callback: (messages: any[]) => void
+) => {
+  const messagesCollectionRef = collection(db, "Rooms", roomId, "Messages");
+  const q = query(messagesCollectionRef, orderBy("timestamp", "asc"));
 
   return onSnapshot(q, async (querySnapshot) => {
     const messages: any[] = [];
     for (const docSnap of querySnapshot.docs) {
       const data = docSnap.data();
       try {
-        const playerDocRef = doc(db, 'Rooms', roomId, 'Players', data.userId);
-        const playerDocSnap: DocumentSnapshot<DocumentData> = await getDoc(playerDocRef);
-        const userName = playerDocSnap.exists() ? playerDocSnap.data()?.userName || "Unknown" : "Unknown";
+        const playerDocRef = doc(db, "Rooms", roomId, "Players", data.userId);
+        const playerDocSnap: DocumentSnapshot<DocumentData> = await getDoc(
+          playerDocRef
+        );
+        const userName = playerDocSnap.exists()
+          ? playerDocSnap.data()?.userName || "Unknown"
+          : "Unknown";
         messages.push({ ...data, id: docSnap.id, userName });
       } catch (error) {
         console.error("Error fetching user name: ", error);
@@ -107,8 +142,11 @@ export const subscribeToMessages = (roomId: string, callback: (messages: any[]) 
   });
 };
 
-export const fetchRoomData = async (roomId: string, callback: (data: { roomData: any, playersList: any[] }) => void): Promise<() => void> => {
-  const roomDocRef = doc(db, 'Rooms', roomId);
+export const fetchRoomData = async (
+  roomId: string,
+  callback: (data: { roomData: any; playersList: any[] }) => void
+): Promise<() => void> => {
+  const roomDocRef = doc(db, "Rooms", roomId);
 
   // Set up real-time listener for the room document
   const unsubscribeRoom = onSnapshot(roomDocRef, async (roomDocSnap) => {
@@ -116,11 +154,14 @@ export const fetchRoomData = async (roomId: string, callback: (data: { roomData:
       const roomData = roomDocSnap.data();
 
       // Set up real-time listener for the players subcollection
-      const playersCollectionRef = collection(roomDocRef, 'Players');
-      const unsubscribePlayers = onSnapshot(playersCollectionRef, (playersSnapshot) => {
-        const playersList = playersSnapshot.docs.map(doc => doc.data());
-        callback({ roomData, playersList });
-      });
+      const playersCollectionRef = collection(roomDocRef, "Players");
+      const unsubscribePlayers = onSnapshot(
+        playersCollectionRef,
+        (playersSnapshot) => {
+          const playersList = playersSnapshot.docs.map((doc) => doc.data());
+          callback({ roomData, playersList });
+        }
+      );
 
       // Combine unsubscribe functions
       const unsubscribe = () => {
@@ -130,7 +171,7 @@ export const fetchRoomData = async (roomId: string, callback: (data: { roomData:
 
       return unsubscribe;
     } else {
-      console.log('No such room!');
+      console.log("No such room!");
       return () => {}; // Return an empty function if the room doesn't exist
     }
   });
@@ -138,25 +179,28 @@ export const fetchRoomData = async (roomId: string, callback: (data: { roomData:
   return unsubscribeRoom; // Return the room unsubscribe function
 };
 
-export const leaveRoom = async (roomId: string, userId: string): Promise<void> => {
+export const leaveRoom = async (
+  roomId: string,
+  userId: string
+): Promise<void> => {
   try {
-    const roomDocRef = doc(db, 'Rooms', roomId);
+    const roomDocRef = doc(db, "Rooms", roomId);
     const roomDocSnap = await getDoc(roomDocRef);
 
     if (!roomDocSnap.exists()) {
-      console.log('No such room!');
+      console.log("No such room!");
       return;
     }
 
     const roomData = roomDocSnap.data();
 
     if (!roomData) {
-      console.log('No room data found!');
+      console.log("No room data found!");
       return;
     }
 
     // Remove the player from the players collection
-    const playersCollectionRef = collection(db, 'Rooms', roomId, 'Players');
+    const playersCollectionRef = collection(db, "Rooms", roomId, "Players");
     const playerDocRef = doc(playersCollectionRef, userId);
     await deleteDoc(playerDocRef);
     console.log(`User ${userId} left room ${roomId}`);
@@ -180,17 +224,20 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
       }
     }
   } catch (e) {
-    console.error('Error leaving room: ', e);
+    console.error("Error leaving room: ", e);
   }
 };
 
-export const updateRoomSettings = async (roomId: string, settings: { topic: string, numQuestions: number, answerTime: number }) => {
+export const updateRoomSettings = async (
+  roomId: string,
+  settings: { topic: string; numQuestions: number; answerTime: number }
+) => {
   try {
-    const roomDocRef = doc(db, 'Rooms', roomId);
+    const roomDocRef = doc(db, "Rooms", roomId);
     await setDoc(roomDocRef, settings, { merge: true });
-    console.log('Room settings updated');
+    console.log("Room settings updated");
   } catch (e) {
-    console.error('Error updating room settings: ', e);
+    console.error("Error updating room settings: ", e);
   }
 };
 
@@ -252,10 +299,7 @@ export const handleRoomLifecycle = async (
         setAnswerTime(roomData.answerTime || 5);
 
         // Subscribe to messages
-        const unsubscribeMessages = subscribeToMessages(
-          roomId,
-          setMessages
-        );
+        const unsubscribeMessages = subscribeToMessages(roomId, setMessages);
 
         return () => {
           if (unsubscribeMessages) unsubscribeMessages();
@@ -273,10 +317,10 @@ export const handleRoomLifecycle = async (
 
 export const startPlaying = async (roomId: string) => {
   try {
-    const roomDocRef = doc(db, 'Rooms', roomId);
+    const roomDocRef = doc(db, "Rooms", roomId);
     await setDoc(roomDocRef, { isPlay: true }, { merge: true });
     console.log(`Room ${roomId} is now playing.`);
   } catch (e) {
-    console.error('Error starting the game: ', e);
+    console.error("Error starting the game: ", e);
   }
 };

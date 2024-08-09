@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/sheet"; // Update the import for sheet
 import { Progress } from "@/components/ui/progress";
 import GoBack from "@/components/go-back";
-import { ThemeProvider } from "next-themes";
 import { Box, CodeXml, Puzzle, Cpu, PenTool, Crown } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -214,110 +213,103 @@ function ConstellationProgress() {
 
   return (
     <Container>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
+      <GoBack href="/learning" />
+      <div className="absolute top-5 right-7 z-[200]">
+        <h2 className="scroll-m-20 pb-2 text-xl font-semibold tracking-tight first:mt-0 z-[200]">
+          Algoat Constellation
+        </h2>
+        <h2 className="scroll-m-20 mb-5 pb-2 text-right text-md font-semibold tracking-tight first:mt-0 z-[200]">
+          Current Progress : 0%
+        </h2>
+      </div>
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesOptions}
+      />
+      <svg
+        style={{
+          position: "absolute",
+          top: 15,
+          left: 15,
+          width: "100%",
+          height: "100%",
+        }}
       >
-        <GoBack href="/learning" />
-        <div className="absolute top-5 right-7 z-[200]">
-          <h2 className="scroll-m-20 pb-2 text-xl font-semibold tracking-tight first:mt-0 z-[200]">
-            Algoat Constellation
-          </h2>
-          <h2 className="scroll-m-20 mb-5 pb-2 text-right text-md font-semibold tracking-tight first:mt-0 z-[200]">
-            Current Progress : 0%
-          </h2>
-        </div>
-        <Particles
-          id="tsparticles"
-          init={particlesInit}
-          options={particlesOptions}
-        />
-        <svg
-          style={{
-            position: "absolute",
-            top: 15,
-            left: 15,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <GlowFilter />
-          {nodePositions.map((pos, index) => (
-            <Line
-              key={index}
-              x1="49%"
-              y1="49%"
-              x2={pos.left}
-              y2={pos.top}
-              completed={completedNodes[index]}
-              index={index}
-            />
-          ))}
-        </svg>
+        <GlowFilter />
         {nodePositions.map((pos, index) => (
-          <NodeWrapper key={index} style={{ top: pos.top, left: pos.left }}>
-            <HoverCard>
-              <HoverCardTrigger>
-                <Node
-                  completed={completedNodes[index]}
-                  onClick={() => setSelectedNode(index)}
-                  index={index}
-                >
-                  {icons[index]}
-                </Node>
-              </HoverCardTrigger>
-              <ProgressLabel>
-                {completedNodes[index] ? "100%" : "0%"}
-              </ProgressLabel>
-              <HoverCardContentStyled>
-                <p>{nodeTitles[index]}</p>
-              </HoverCardContentStyled>
-            </HoverCard>
-          </NodeWrapper>
+          <Line
+            key={index}
+            x1="49%"
+            y1="49%"
+            x2={pos.left}
+            y2={pos.top}
+            completed={completedNodes[index]}
+            index={index}
+          />
         ))}
-        <CoreWrapper glowIntensity={glowIntensity} coreColor={coreColor}>
-          <Crown color="#fff" size={48} />
-        </CoreWrapper>
-        {selectedNode !== null && (
-          <Sheet open={true} onOpenChange={() => setSelectedNode(null)}>
-            <SheetTrigger />
-            <SheetContent className="z-[999]">
-              <SheetHeader>
-                <Image
-                  src="/material/data-structures.png"
-                  alt="Material"
-                  width={400} // Adjust image width
-                  height={400} // Adjust image height
-                  className="transition-all duration-300blur-sm
+      </svg>
+      {nodePositions.map((pos, index) => (
+        <NodeWrapper key={index} style={{ top: pos.top, left: pos.left }}>
+          <HoverCard>
+            <HoverCardTrigger>
+              <Node
+                completed={completedNodes[index]}
+                onClick={() => setSelectedNode(index)}
+                index={index}
+              >
+                {icons[index]}
+              </Node>
+            </HoverCardTrigger>
+            <ProgressLabel>
+              {completedNodes[index] ? "100%" : "0%"}
+            </ProgressLabel>
+            <HoverCardContentStyled>
+              <p>{nodeTitles[index]}</p>
+            </HoverCardContentStyled>
+          </HoverCard>
+        </NodeWrapper>
+      ))}
+      <CoreWrapper glowIntensity={glowIntensity} coreColor={coreColor}>
+        <Crown color="#fff" size={48} />
+      </CoreWrapper>
+      {selectedNode !== null && (
+        <Sheet open={true} onOpenChange={() => setSelectedNode(null)}>
+          <SheetTrigger />
+          <SheetContent className="z-[999]">
+            <SheetHeader>
+              <Image
+                src="/material/data-structures.png"
+                alt="Material"
+                width={400} // Adjust image width
+                height={400} // Adjust image height
+                className="transition-all duration-300blur-sm
                       rounded-xl z-0"
-                />
-                <SheetTitle className="text-4xl mt-5">
-                  {nodeTitles[selectedNode]}
-                </SheetTitle>
-                <SheetDescription className="text-md">
-                  {nodeDescriptions[selectedNode]}
-                </SheetDescription>
-                <p>Current Progress : 45%</p>
-                <Progress value={45} />
-              </SheetHeader>
-              <SheetFooter>
-                <SheetClose asChild>
-                  <Link
-                    href="/learning/material/data-structures"
-                    className="w-full"
-                  >
-                    <Button className="w-full mt-5" type="submit">
-                      Start Learning
-                    </Button>
-                  </Link>
-                </SheetClose>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
-        )}
-      </ThemeProvider>
+              />
+              <SheetTitle className="text-4xl mt-5">
+                {nodeTitles[selectedNode]}
+              </SheetTitle>
+              <SheetDescription className="text-md">
+                {nodeDescriptions[selectedNode]}
+              </SheetDescription>
+              <p>Current Progress : 45%</p>
+              <Progress value={45} />
+            </SheetHeader>
+            <SheetFooter>
+              <SheetClose asChild>
+                <Link
+                  href="/learning/material/data-structures"
+                  className="w-full"
+                >
+                  <Button className="w-full mt-5" type="submit">
+                    Start Learning
+                  </Button>
+                </Link>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      )}
     </Container>
   );
 }
