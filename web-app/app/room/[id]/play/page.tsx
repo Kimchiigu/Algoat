@@ -87,6 +87,7 @@ const PlayPage = () => {
   >([]);
   const { currentUser } = useUserStore();
   const [answerTime, setAnswerTime] = useState(1);
+  const [isLock, setIsLock] = useState(false);
 
   // Get the room data
   const [roomData, setRoomData] = useState(null);
@@ -189,16 +190,19 @@ const PlayPage = () => {
         if (data.status === "question") {
           setPhase("question");
           fetchQuestion(sessionId);
+          setTimer(15);
           console.log("question");
         } else if (data.status === "answer") {
           setPhase("answer");
           console.log("answer");
         } else if (data.status === "judging") {
+          setIsLock(true);
           setPhase("judging");
           console.log("judging");
         } else if (data.status === "leaderboard") {
           console.log("leaderboard");
           setPhase("leaderboard");
+          setIsLock(false);
           fetchLeaderboard(sessionId);
         } else if (data.status === "ended") {
           setPhase("ended");
@@ -237,6 +241,7 @@ const PlayPage = () => {
 
   const lockAnswer = async () => {
     if (!sessionId) return;
+    setIsLock(true);
     try {
       await axios.post(`/submit_answer/${sessionId}`, {
         player: currentUser?.id,
@@ -269,14 +274,22 @@ const PlayPage = () => {
     if (!startTime) return;
     console.log(startTime);
     if (timer > 0) {
-      const timeoutId = setTimeout(() => {
-        const newTimer = Math.round(
-          answerTime * 60 -
-            (currentTime.getTime() - new Date(startTime).getTime()) / 1000
-        );
-        setTimer(newTimer);
-      }, 1000);
-      return () => clearTimeout(timeoutId);
+      if (phase === "answer") {
+        const timeoutId = setTimeout(() => {
+          const newTimer = Math.round(
+            answerTime * 60 -
+              (currentTime.getTime() - new Date(startTime).getTime()) / 1000
+          );
+          setTimer(newTimer);
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+      } else {
+        const timeoutId = setTimeout(() => {
+          const newTimer = timer - 1;
+          setTimer(newTimer);
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+      }
     }
   }, [timer, phase]);
 
@@ -295,6 +308,7 @@ const PlayPage = () => {
             </h1>
             <p className="text-xl">{question}</p>
             <p className="text-sm">Read the question carefully</p>
+            <p className="text-sm">{timer}</p>
             <div className="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-destructive"
@@ -324,12 +338,14 @@ const PlayPage = () => {
               className="w-full p-2 border rounded h-56"
               placeholder="Type your answer here..."
             ></Textarea>
-            <Button
-              className="mt-4 bg-primary text-primary-foreground"
-              onClick={lockAnswer}
-            >
-              Lock Answer
-            </Button>
+            {isLock || (
+              <Button
+                className="mt-4 bg-primary text-primary-foreground"
+                onClick={lockAnswer}
+              >
+                Lock Answer
+              </Button>
+            )}
           </div>
         )}
 

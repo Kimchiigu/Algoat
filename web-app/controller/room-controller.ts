@@ -27,7 +27,7 @@ export const createRoom = async (roomName: string, roomPassword: string, owner: 
       ownerId: owner,
       name: roomName,
       password: roomPassword,
-      topic: "Data Structure",
+      topic: "Algorithm and Data Structure",
       numQuestions: 10,
       answerTime: 5
     });

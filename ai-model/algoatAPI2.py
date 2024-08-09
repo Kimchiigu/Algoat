@@ -150,10 +150,12 @@ def start_game(request: StartGameRequest):
     if filtered_df.empty:
         raise HTTPException(status_code=400, detail="No questions available for the specified category")
     
+    print("errorr")
     # Select the specified number of questions
     questions = filtered_df.sample(n=request.num_questions).to_dict(orient="records")
     print("soal 2", [{ "question": q["question"], "category": q["category"] } for q in questions])
     participants = [{"player": p, "score": 0} for p in request.participants]
+    
     
     db.collection("Games").document(session_id).set({
         "room_id": request.room_id,
@@ -167,7 +169,6 @@ def start_game(request: StartGameRequest):
         "answer_time": request.answer_time,  # Store answer time
         "num_questions": request.num_questions  # Store number of questions
     })
-    
     # Save participants in a sub-collection
     for participant in participants:
         db.collection("Games").document(session_id).collection("Participants").document(participant["player"]).set(participant)
