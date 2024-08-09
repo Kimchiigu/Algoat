@@ -297,7 +297,7 @@ const PlayPage = () => {
             <p className="text-sm">Read the question carefully</p>
             <div className="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary"
+                className="h-full bg-destructive"
                 style={{ width: `${(timer / 10) * 100}%` }}
               ></div>
             </div>

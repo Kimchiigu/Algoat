@@ -30,7 +30,7 @@ import { Crown } from "lucide-react";
 
 const materials = [
   {
-    name: "01 - Introduction to Data Structures",
+    name: "01 - Introduction",
     avatar: "https://github.com/shadcn.png",
     fallback: "01",
     content: `
@@ -117,7 +117,7 @@ export default function RoomPage() {
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="p-2">
-                      <p>{material.content}</p>
+                      <p className="">{material.content}</p>
                       <Separator className="my-2" />
                       {/* Add more content or components here if needed */}
                     </div>
@@ -160,7 +160,7 @@ export default function RoomPage() {
         <CardContent className="flex-grow bg-slate-900 rounded-md">
           {/* Messages area, replace with actual chat implementation */}
         </CardContent>
-        <CardFooter className="flex space-x-2">
+        <CardFooter className="mt-5 w-full flex space-x-2">
           <Input className="flex-grow" placeholder="Type your message" />
           <Button type="submit">Send</Button>
         </CardFooter>

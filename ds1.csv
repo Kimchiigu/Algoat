@@ -1,0 +1,11 @@
+Question,Answer
+"How hash table handle collision,""One way hash tables handle collisions is through chaining, where each bucket contains a linked list. If multiple keys hash to the same index, they are stored in the linked list at that index."""
+"How hash table handle collision,""Hash tables can use open addressing to handle collisions, where probing techniques like linear probing, quadratic probing, or double hashing are used to find the next available slot in the table."""
+"How hash table handle collision,""In chaining, each slot in the hash table points to a linked list of entries that hash to the same index. When a collision occurs, the new entry is simply added to the end of the linked list."""
+"How hash table handle collision,""Open addressing handles collisions by storing all entries directly in the hash table. When a collision occurs, a probing sequence is used to find the next empty slot."""
+"How hash table handle collision,""Chaining involves creating a linked list for each slot in the hash table. When a collision occurs, the new key-value pair is added to the list at the corresponding index."""
+How hash table handle collision,Linear probing is a method of open addressing where collisions are resolved by checking the next sequential slots until an empty one is found. This reduces clustering but can still degrade performance if the table becomes too full.
+How hash table handle collision,Quadratic probing handles collisions by checking slots at increasing intervals. This reduces primary clustering compared to linear probing but can introduce secondary clustering.
+How hash table handle collision,Double hashing uses a secondary hash function to determine the interval between probes. This technique reduces clustering and provides a more uniform distribution of entries.
+"How hash table handle collision,""In chaining, each bucket of the hash table points to a linked list. Collisions are handled by inserting collided elements into this list, allowing multiple elements to occupy the same bucket."""
+"How hash table handle collision,""Open addressing involves rehashing the collided key using a probing sequence to find an empty slot. Common methods include linear probing, quadratic probing, and double hashing."""
