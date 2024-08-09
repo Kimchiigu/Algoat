@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, DocumentData, DocumentSnapshot, deleteDoc, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, DocumentData, DocumentSnapshot, deleteDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 
 const generateRoomId = async (): Promise<number> => {
@@ -172,8 +172,11 @@ export const leaveRoom = async (roomId: string, userId: string): Promise<void> =
       } else {
         // Assign the next player as the owner
         const nextPlayer = playersSnapshot.docs[0];
-        await setDoc(roomDocRef, { ownerId: nextPlayer.id }, { merge: true });
-        console.log(`Ownership transferred to user ${nextPlayer.id}`);
+        const nextPlayerData = nextPlayer.data(); // Retrieve the data of the next player
+        const newOwnerId = nextPlayerData.userId; // Assuming the field is called 'userId'
+
+        await updateDoc(roomDocRef, { ownerId: newOwnerId });
+        console.log(`Ownership transferred to user ${newOwnerId}`);
       }
     }
   } catch (e) {
@@ -220,7 +223,7 @@ export const handleRoomLifecycle = async (
 
   if (!currentUser) {
     console.log("User not authenticated");
-    router.push("/");
+    router.push("/home");
     return;
   }
 
@@ -235,8 +238,8 @@ export const handleRoomLifecycle = async (
         );
 
         if (!isMember) {
-          console.log("User is not a member of the room");
-          router.push("/");
+          // console.log("User is not a member of the room");
+          router.push("/home");
           return;
         }
 
