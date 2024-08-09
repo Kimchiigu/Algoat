@@ -134,9 +134,9 @@ const RoomPage = () => {
   }, [id, router, currentUser]);
 
   const handleLeaveRoom = async () => {
-    if (user && typeof id === "string") {
-      await leaveRoom(id, user.uid);
-      router.push("/");
+    if (currentUser) {
+      await leaveRoom(id as string, currentUser.id);
+      router.push("/home");
     }
   };
 
