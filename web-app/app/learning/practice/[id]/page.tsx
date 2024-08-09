@@ -215,13 +215,13 @@ export default function PracticePage() {
               <div className="flex gap-3 justify-center">
                 <Button
                   className="bg-primary text-primary-foreground"
-                  onClick={() => handleUpdateSettings}
+                  onClick={() => handleUpdateSettings()}
                 >
                   Update Settings
                 </Button>
                 <Button
                   className="bg-primary text-primary-foreground"
-                  onClick={() => handleStartPlaying}
+                  onClick={() => handleStartPlaying()}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
