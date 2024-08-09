@@ -127,18 +127,22 @@ export default function PracticePage() {
   };
 
   const handleUpdateSettings = async () => {
-    if (roomData && currentUser && currentUser.id === roomData.ownerId) {
+    try {
       await updateRoomSettings(id as string, {
         topic,
         numQuestions,
         answerTime,
       });
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleStartPlaying = async () => {
-    if (roomData && currentUser && currentUser.id === roomData.ownerId) {
+    try {
       await startPlaying(id as string);
+    } catch (error) {
+      console.error(error);
     }
   };
 
