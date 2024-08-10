@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import useUserStore from "@/lib/user-store";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/firebase";
+import GoBack from "@/components/go-back";
 
 interface RoomData {
   name: string;
@@ -148,6 +149,7 @@ export default function PracticePage() {
 
   return (
     <div className="relative w-full min-h-screen">
+      <GoBack href="/learning"></GoBack>
       <Particles
         id="tsparticles"
         init={particlesInit}

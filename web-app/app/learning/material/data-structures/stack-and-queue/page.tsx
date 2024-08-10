@@ -85,7 +85,7 @@ const materials = [
   // Add more materials as needed
 ];
 
-export default function RoomPage() {
+export default function StackAndQueuePage() {
   return (
     <div className="flex justify-between p-4 space-x-4">
       {/* Course Outline */}
