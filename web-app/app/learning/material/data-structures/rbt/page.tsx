@@ -24,91 +24,101 @@ import withAuth from "@/hoc/withAuth";
 
 const materials = [
   {
-    name: "01 - Pengenalan Red-Black Tree",
+    name: "01 - Apa itu Red-Black Tree?",
     avatar: "https://github.com/shadcn.png",
     fallback: "01",
     shortDesc:
-      "Red-Black Tree adalah jenis Balanced Binary Tree yang menggunakan pewarnaan node untuk menjaga keseimbangan.",
+      "Red-Black Tree adalah jenis struktur data pohon biner yang seimbang, yang ditemukan pada tahun 1972 untuk memastikan keseimbangan pohon biner secara otomatis.",
     content: `
-      Red-Black Tree adalah jenis Balanced Binary Tree yang memiliki aturan pewarnaan untuk menjaga keseimbangan setelah setiap operasi penyisipan atau penghapusan. Setiap node dalam Red-Black Tree diberi warna merah atau hitam, dan aturan-aturan tertentu harus diikuti untuk memastikan bahwa tree tetap seimbang.
+      Red-Black Tree (RBT) adalah jenis pohon biner yang seimbang, yang digunakan dalam ilmu komputer untuk memastikan bahwa operasi pencarian, penyisipan, dan penghapusan dapat dilakukan dengan efisien. Pohon ini diberi nama berdasarkan pewarnaan node dalam tree, yaitu merah dan hitam.
 
-      *Karakteristik Red-Black Tree:*
-      - Setiap node berwarna merah atau hitam.
-      - Root selalu berwarna hitam.
-      - Setiap daun (node kosong) berwarna hitam.
-      - Jika sebuah node berwarna merah, maka kedua anaknya harus berwarna hitam (tidak ada dua node merah yang berturut-turut).
-      - Setiap jalur dari sebuah node ke daun (atau node kosong) harus memiliki jumlah node hitam yang sama.
-
-      *Keuntungan Red-Black Tree:*
-      Red-Black Tree memastikan bahwa operasi pencarian, penyisipan, dan penghapusan dapat dilakukan dalam waktu O(log n) dalam skenario terburuk, membuatnya sangat efisien dalam berbagai aplikasi.
-
-      *Aplikasi Red-Black Tree:*
-      Red-Black Tree digunakan dalam berbagai aplikasi seperti pengelolaan basis data, sistem file, dan implementasi bahasa pemrograman seperti Java dan C++.
+      <b>Penemuan Red-Black Tree:</b>
+      - <b>Penemu:</b> Red-Black Tree ditemukan oleh Rudolf Bayer, seorang ilmuwan komputer.
+      - <b>Tahun Ditemukan:</b> Red-Black Tree pertama kali diperkenalkan pada tahun 1972.
+      
+      <b>Tujuan Red-Black Tree:</b>
+      - Tujuan utama dari Red-Black Tree adalah untuk menjaga keseimbangan pohon biner secara otomatis setelah setiap operasi penyisipan dan penghapusan, tanpa memerlukan intervensi manual.
+      
+      <b>Alasan Red-Black Tree Dibuat:</b>
+      - Red-Black Tree dibuat untuk mengatasi masalah yang terjadi pada pohon biner biasa, di mana pohon bisa menjadi tidak seimbang setelah beberapa operasi, menyebabkan operasi pencarian, penyisipan, dan penghapusan menjadi tidak efisien. Dengan menjaga keseimbangan melalui aturan pewarnaan, RBT memastikan bahwa pohon tetap mendekati seimbang, sehingga operasi tetap dapat dilakukan dalam waktu O(log n) bahkan dalam kasus terburuk.
     `,
   },
   {
-    name: "02 - Operasi pada Red-Black Tree",
+    name: "02 - Properti Red-Black Tree",
     avatar: "https://github.com/shadcn.png",
     fallback: "02",
     shortDesc:
-      "Operasi pada Red-Black Tree melibatkan penyisipan, penghapusan, dan penyeimbangan menggunakan rotasi dan pewarnaan.",
+      "Red-Black Tree memiliki beberapa properti yang harus dipenuhi untuk memastikan keseimbangan tree.",
     content: `
-      Red-Black Tree mendukung operasi penyisipan, penghapusan, dan pencarian dengan memastikan bahwa tree tetap seimbang melalui rotasi dan penyesuaian pewarnaan.
+      Red-Black Tree memiliki beberapa properti yang harus dipenuhi untuk memastikan keseimbangan tree. Properti-properti tersebut adalah sebagai berikut:
 
-      *Penyisipan dalam Red-Black Tree:*
-      Ketika sebuah node baru disisipkan, node tersebut awalnya diwarnai merah. Jika hal ini menyebabkan dua node merah berturut-turut, maka dilakukan rotasi dan pewarnaan ulang untuk menjaga keseimbangan tree sesuai aturan Red-Black Tree.
-
-      *Penghapusan dalam Red-Black Tree:*
-      Penghapusan node dalam Red-Black Tree lebih kompleks dibandingkan penyisipan. Ketika sebuah node dihapus, perlu dilakukan penyesuaian untuk memastikan bahwa aturan-aturan pewarnaan tetap dipenuhi, yang mungkin melibatkan rotasi dan perubahan warna.
-
-      *Penyeimbangan Red-Black Tree:*
-      Penyeimbangan dalam Red-Black Tree dilakukan melalui dua jenis rotasi:
-      - *Rotasi Kiri (Left Rotation):* Digunakan ketika subtree kanan terlalu tinggi.
-      - *Rotasi Kanan (Right Rotation):* Digunakan ketika subtree kiri terlalu tinggi.
-      Penyeimbangan ini dilakukan secara otomatis setelah penyisipan atau penghapusan untuk memastikan bahwa tree tetap efisien.
+      <b>Properti Red-Black Tree:</b>
+      - Setiap node memiliki warna, merah atau hitam.
+      - Root selalu berwarna hitam.
+      - Semua node eksternal berwarna hitam.
+      - Jika sebuah node berwarna merah, maka kedua anaknya harus berwarna hitam.
     `,
   },
   {
-    name: "03 - Keuntungan dan Kelemahan Red-Black Tree",
+    name: "03 - Operasi Insert pada Red-Black Tree",
     avatar: "https://github.com/shadcn.png",
     fallback: "03",
     shortDesc:
-      "Red-Black Tree menawarkan efisiensi tinggi dalam operasi tree, namun memiliki kompleksitas yang lebih tinggi dibandingkan tree lainnya.",
+      "Operasi insert pada Red-Black Tree melibatkan penyisipan node baru dan memperbaiki pelanggaran yang terjadi.",
     content: `
-      Red-Black Tree adalah struktur data yang sangat efisien, namun juga memiliki kompleksitas tertentu yang perlu dipertimbangkan.
+      Operasi insert pada Red-Black Tree melibatkan beberapa langkah untuk memastikan bahwa tree tetap seimbang setelah penambahan node baru.
 
-      *Keuntungan Red-Black Tree:*
-      - *Efisiensi:* Operasi pada Red-Black Tree dilakukan dalam O(log n) waktu, memastikan performa yang cepat.
-      - *Keseimbangan:* Tree selalu mendekati seimbang, yang berarti bahwa operasi tree tetap efisien bahkan dengan sejumlah besar data.
-      - *Penggunaan Umum:* Red-Black Tree digunakan dalam berbagai aplikasi termasuk pengelolaan basis data, sistem file, dan banyak lagi.
+      <b>Langkah-langkah Insert:</b>
+      - Menyisipkan node baru sama seperti menyisipkan dalam binary search tree (node baru harus ditempatkan di salah satu node eksternal).
+      - Node baru tersebut berwarna merah.
+      - Jika orang tua (parent) berwarna hitam, maka tidak ada pelanggaran yang terjadi.
+      - Jika orang tua berwarna merah, maka terjadi pelanggaran (tidak ada node merah yang memiliki orang tua berwarna merah).
 
-      *Kelemahan Red-Black Tree:*
-      - *Kompleksitas Implementasi:* Red-Black Tree lebih kompleks untuk diimplementasikan dibandingkan struktur data lainnya seperti AVL Tree.
-      - *Overhead Penyeimbangan:* Penyeimbangan otomatis setelah setiap operasi bisa menambah overhead, terutama pada operasi penyisipan dan penghapusan yang kompleks.
-
-      *Kesimpulan:*
-      Red-Black Tree adalah pilihan yang sangat baik untuk aplikasi di mana keseimbangan tree dan efisiensi operasi sangat penting, meskipun memerlukan lebih banyak upaya dalam implementasi dan pemeliharaan.
+      <b>Memperbaiki Pelanggaran:</b>
+      - Biarkan node baru tersebut sebagai q, orang tuanya sebagai p, dan saudara dari orang tuanya sebagai s (paman dari q). Jika orang tua tidak memiliki saudara, maka s adalah hitam (node eksternal adalah hitam).
+      - Jika s berwarna merah, ubah p dan s menjadi hitam dan orang tua dari p menjadi merah (proses recoloring).
+      - Jika s berwarna hitam, lakukan rotasi (rotasi tunggal atau ganda), ubah pivot terakhir dari rotasi menjadi hitam dan anaknya menjadi merah.
     `,
   },
   {
-    name: "04 - Aplikasi Red-Black Tree",
+    name: "04 - Operasi Delete pada Red-Black Tree",
     avatar: "https://github.com/shadcn.png",
     fallback: "04",
+    shortDesc:
+      "Operasi delete pada Red-Black Tree memastikan tree tetap seimbang setelah penghapusan node.",
+    content: `
+      Operasi delete dalam Red-Black Tree melibatkan beberapa langkah untuk memastikan pohon tetap seimbang dan mengikuti aturan red-black.
+
+      <b>Langkah-langkah Delete:</b>
+      - Lakukan penghapusan standar BST (node yang dihapus akan digantikan oleh node anaknya atau oleh node kosong).
+      - Jika salah satu dari u atau node yang dihapus (v) berwarna merah, tandai anak yang digantikan sebagai hitam. Tidak ada perubahan pada black height.
+      - Jika baik u maupun v berwarna hitam, u menjadi Double Black.
+
+      <b>Menghilangkan Double Black:</b>
+      - Jika saudara (s) dari node yang digantikan (u) berwarna hitam dan setidaknya salah satu anaknya berwarna merah, lakukan restrukturisasi (rotasi AVL).
+      - Jika saudara berwarna hitam dan kedua anaknya berwarna hitam, lakukan recoloring (orang tua diberi warna hitam dan saudara diberi warna merah) dan lanjutkan proses ini pada orang tua jika orang tua berwarna hitam.
+      - Jika saudara berwarna merah, lakukan penyesuaian (rotasi untuk menaikkan saudara lama, ubah warna saudara lama dan orang tua. Saudara baru selalu berwarna hitam).
+    `,
+  },
+  {
+    name: "05 - Aplikasi Red-Black Tree",
+    avatar: "https://github.com/shadcn.png",
+    fallback: "05",
     shortDesc:
       "Red-Black Tree digunakan dalam berbagai aplikasi penting, termasuk basis data, sistem file, dan algoritma pemrograman.",
     content: `
       Red-Black Tree adalah struktur data yang banyak digunakan dalam berbagai aplikasi penting karena sifatnya yang efisien dan seimbang.
 
-      *Aplikasi dalam Basis Data:*
+      <b>Aplikasi dalam Basis Data:</b>
       Red-Black Tree digunakan untuk mengimplementasikan indeks dalam sistem basis data. Indeks ini memungkinkan pencarian data yang cepat dan efisien, yang sangat penting untuk kinerja basis data yang tinggi.
 
-      *Penggunaan dalam Sistem File:*
+      <b>Penggunaan dalam Sistem File:</b>
       Sistem file sering menggunakan Red-Black Tree untuk mengelola struktur direktori dan file. Ini memungkinkan operasi seperti pencarian file, penambahan file, dan penghapusan file dilakukan dengan cepat.
 
-      *Algoritma Pemrograman:*
+      <b>Algoritma Pemrograman:</b>
       Red-Black Tree juga digunakan dalam algoritma pemrograman, termasuk pengelolaan memori dan penyusunan prioritas tugas dalam sistem operasi.
 
-      *Penggunaan dalam Bahasa Pemrograman:*
+      <b>Penggunaan dalam Bahasa Pemrograman:</b>
       Bahasa pemrograman seperti Java dan C++ menggunakan Red-Black Tree dalam implementasi kelas koleksi mereka, seperti TreeMap dan TreeSet di Java, untuk menyimpan data dalam urutan tertentu dan memungkinkan pencarian yang cepat.
     `,
   },
@@ -133,7 +143,7 @@ function RBTPage() {
   return (
     <div className="flex justify-between p-4 space-x-4">
       {/* Course Outline */}
-      <Card className="flex flex-col w-1/4 h-screen p-4">
+      <Card className="flex flex-col w-1/4 h-full p-4">
         <CardHeader>
           <CardTitle>Course Outline</CardTitle>
         </CardHeader>
@@ -152,11 +162,6 @@ function RBTPage() {
                         <AvatarFallback>{material.fallback}</AvatarFallback>
                       </Avatar>
                       <span className="flex-grow">{material.name}</span>
-                      {index === 0 && (
-                        <span>
-                          <Crown className="ml-2" />
-                        </span>
-                      )}
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -181,7 +186,7 @@ function RBTPage() {
       </Card>
 
       {/* Room Settings */}
-      <Card className="flex flex-col w-1/2 h-screen p-4">
+      <Card className="flex flex-col w-1/2 h-full p-4">
         <CardHeader>
           <CardTitle>{materials[currentIndex].name}</CardTitle>
         </CardHeader>
