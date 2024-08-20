@@ -27,6 +27,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Crown } from "lucide-react";
+import withAuth from "@/hoc/withAuth";
 
 const materials = [
   {
@@ -85,7 +86,7 @@ const materials = [
   // Add more materials as needed
 ];
 
-export default function StackAndQueuePage() {
+function StackAndQueuePage() {
   return (
     <div className="flex justify-between p-4 space-x-4">
       {/* Course Outline */}
@@ -168,3 +169,5 @@ export default function StackAndQueuePage() {
     </div>
   );
 }
+
+export default withAuth(StackAndQueuePage, true);

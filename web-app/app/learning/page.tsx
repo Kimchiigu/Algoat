@@ -11,6 +11,7 @@ import Link from "next/link";
 import GoBack from "@/components/go-back";
 import { createRoom, joinRoom } from "@/controller/room-controller";
 import useUserStore from "@/lib/user-store";
+import withAuth from "@/hoc/withAuth";
 
 interface HoverCardProps {
   imageSrc: string;
@@ -18,7 +19,7 @@ interface HoverCardProps {
   description: string;
 }
 
-export default function LearningPage() {
+function LearningPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const { currentUser } = useUserStore();
@@ -159,3 +160,5 @@ function HoverCard({ imageSrc, title, description }: HoverCardProps) {
     </Card>
   );
 }
+
+export default withAuth(LearningPage, true);

@@ -8,6 +8,7 @@ import RankingTable from "./ranking-table";
 import { CircleArrowLeft } from "lucide-react";
 import Link from "next/link";
 import GoBack from "@/components/go-back";
+import withAuth from "@/hoc/withAuth";
 
 const users = [
   {
@@ -82,7 +83,7 @@ const users = [
   },
 ];
 
-export default function RankingPage() {
+function RankingPage() {
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
   }, []);
@@ -121,3 +122,5 @@ export default function RankingPage() {
     </div>
   );
 }
+
+export default withAuth(RankingPage, true);

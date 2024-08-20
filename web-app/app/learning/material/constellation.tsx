@@ -173,6 +173,22 @@ const nodeDescriptions = [
   "Learn the essentials of designing user-friendly websites.",
 ];
 
+const nodeImages = [
+  "/material/data-structures.png",
+  "/material/algorithm-programming.png",
+  "/material/design-pattern.png",
+  "/material/software-architecture.png",
+  "/material/web-design.png",
+];
+
+const nodeRoutes = [
+  "/learning/material/data-structures",
+  "/learning/material/algorithm-programming",
+  "/learning/material/design-pattern",
+  "/learning/material/software-architecture",
+  "/learning/material/web-design",
+];
+
 function ConstellationProgress() {
   const [completedNodes, setCompletedNodes] = useState([
     false,
@@ -279,7 +295,7 @@ function ConstellationProgress() {
           <SheetContent className="z-[999]">
             <SheetHeader>
               <Image
-                src="/material/data-structures.png"
+                src={nodeImages[selectedNode]}
                 alt="Material"
                 width={400} // Adjust image width
                 height={400} // Adjust image height
@@ -292,15 +308,12 @@ function ConstellationProgress() {
               <SheetDescription className="text-md">
                 {nodeDescriptions[selectedNode]}
               </SheetDescription>
-              <p>Current Progress : 45%</p>
-              <Progress value={45} />
+              <p>Current Progress : 0%</p>
+              <Progress value={0} />
             </SheetHeader>
             <SheetFooter>
               <SheetClose asChild>
-                <Link
-                  href="/learning/material/data-structures"
-                  className="w-full"
-                >
+                <Link href={nodeRoutes[selectedNode]} className="w-full">
                   <Button className="w-full mt-5" type="submit">
                     Start Learning
                   </Button>

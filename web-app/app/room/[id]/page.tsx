@@ -29,6 +29,7 @@ import { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import Particles from "react-tsparticles";
 import { Lightbulb } from "lucide-react";
+import withAuth from "@/hoc/withAuth";
 
 interface RoomData {
   name: string;
@@ -386,4 +387,4 @@ const RoomPage = () => {
   );
 };
 
-export default RoomPage;
+export default withAuth(RoomPage, true);

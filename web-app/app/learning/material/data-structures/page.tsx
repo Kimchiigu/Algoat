@@ -58,7 +58,7 @@ const cardData: CardContentProps[] = [
   },
 ];
 
-function MaterialPage() {
+function DataStructuresPage() {
   const router = useRouter();
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
@@ -159,4 +159,4 @@ function HoverCard({ imageSrc, title, description }: CardContentProps) {
   );
 }
 
-export default withAuth(MaterialPage, true);
+export default withAuth(DataStructuresPage, true);

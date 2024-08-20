@@ -29,6 +29,7 @@ import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import { Textarea } from "@/components/ui/textarea";
+import withAuth from "@/hoc/withAuth";
 
 interface QuestionResponse {
   question: string;
@@ -382,4 +383,4 @@ const PlayPage = () => {
   );
 };
 
-export default PlayPage;
+export default withAuth(PlayPage, true);
