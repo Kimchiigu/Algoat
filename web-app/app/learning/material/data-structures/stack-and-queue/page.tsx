@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Crown } from "lucide-react";
 import withAuth from "@/hoc/withAuth";
-import withAuth from "@/hoc/withAuth";
+import { useRouter } from "next/router";
 
 const materials = [
   {
@@ -96,6 +96,26 @@ const materials = [
 ];
 
 export default function RoomPage() {
+  const router = useRouter();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const totalMaterials = materials.length;
+
+  const parseMarkdown = (text: string) => {
+    return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((currentIndex + 1) % totalMaterials);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((currentIndex - 1 + totalMaterials) % totalMaterials);
+  };
+
+  const handleReadMore = (index: number) => {
+    setCurrentIndex(index);
+  };
+
   return (
     <div className="flex justify-between p-4 space-x-4">
       {/* Course Outline */}
