@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import useUserStore from "@/lib/user-store";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/firebase";
+import GoBack from "@/components/go-back";
+import withAuth from "@/hoc/withAuth";
 
 interface RoomData {
   name: string;
@@ -66,7 +68,7 @@ const tips = [
   "Build a portfolio of your projects.",
 ];
 
-export default function PracticePage() {
+function PracticePage() {
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
@@ -148,6 +150,7 @@ export default function PracticePage() {
 
   return (
     <div className="relative w-full min-h-screen">
+      <GoBack href="/learning"></GoBack>
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -247,3 +250,5 @@ export default function PracticePage() {
     </div>
   );
 }
+
+export default withAuth(PracticePage, true);

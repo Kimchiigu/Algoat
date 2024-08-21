@@ -12,8 +12,9 @@ import { loadStarsPreset } from "tsparticles-preset-stars";
 import { useForumsAndUsers } from "@/hooks/forums-hooks";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import withAuth from "@/hoc/withAuth";
 
-export default function ForumPage() {
+function ForumPage() {
   const router = useRouter();
   const { forums, users } = useForumsAndUsers();
 
@@ -100,3 +101,5 @@ export default function ForumPage() {
     </div>
   );
 }
+
+export default withAuth(ForumPage, true);

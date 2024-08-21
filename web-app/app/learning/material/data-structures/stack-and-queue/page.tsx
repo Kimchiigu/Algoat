@@ -21,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Crown } from "lucide-react";
 import withAuth from "@/hoc/withAuth";
+import withAuth from "@/hoc/withAuth";
 
 const materials = [
   {
@@ -56,55 +57,45 @@ const materials = [
     shortDesc:
       "Queue adalah struktur data linear yang mengikuti prinsip First In, First Out (FIFO).",
     content: `
-      Queue adalah struktur data linear yang mengikuti prinsip First In, First Out (FIFO), di mana elemen yang pertama kali ditambahkan adalah yang pertama kali dihapus. Struktur ini mirip dengan antrian orang di loket tiket, di mana orang pertama dalam antrian adalah yang pertama dilayani.
-
-      *Operasi pada Queue:*
-      Beberapa operasi dasar pada queue meliputi:
-      - *Enqueue:* Menambahkan elemen baru di belakang queue.
-      - *Dequeue:* Menghapus elemen dari depan queue.
-      - *Front:* Mengakses elemen di depan tanpa menghapusnya.
-      - *Rear:* Mengakses elemen di belakang.
-      - *isEmpty:* Mengecek apakah queue kosong.
-
-      *Implementasi Queue:*
-      Queue dapat diimplementasikan menggunakan array atau linked list. Dengan array, indeks depan dan belakang digunakan untuk melacak elemen pertama dan terakhir. Dalam linked list, node pertama dianggap sebagai elemen depan dan node terakhir sebagai elemen belakang.
-
-      *Jenis-Jenis Queue:*
-      - *Simple Queue:* Queue dasar yang mengikuti prinsip FIFO.
-      - *Circular Queue:* Queue di mana elemen terakhir terhubung kembali ke elemen pertama, membentuk lingkaran.
-      - *Priority Queue:* Queue di mana elemen diproses berdasarkan prioritas, bukan urutan kedatangan.
-      - *Deque (Double-ended Queue):* Queue yang memungkinkan penyisipan dan penghapusan elemen dari kedua ujung.
-
-      *Aplikasi Queue:*
-      Queue digunakan dalam berbagai aplikasi seperti:
-      - Manajemen antrian di sistem operasi.
-      - Penjadwalan proses dalam CPU.
-      - Penanganan antrean printer.
-      - Pengiriman data di jaringan.
+      A linked list is a linear data structure where elements are not stored at contiguous memory locations.
+      Each element (node) in a linked list contains a reference (link) to the next element in the sequence.
+      Topics include:
+      - Introduction to linked lists and their types (singly, doubly, and circular linked lists).
+      - Operations on linked lists: insertion, deletion, traversal, and searching.
+      - Advantages and disadvantages of linked lists compared to arrays.
     `,
   },
+  {
+    name: "03 - Stack",
+    avatar: "https://github.com/shadcn.png",
+    fallback: "03",
+    content: `
+      A stack is a linear data structure that follows the Last In, First Out (LIFO) principle.
+      It is used for storing data in a way that the last element added is the first to be removed.
+      Topics include:
+      - Introduction to stacks and their applications.
+      - Stack operations: push, pop, peek, and isEmpty.
+      - Implementation of stacks using arrays and linked lists.
+    `,
+  },
+  {
+    name: "04 - Queue",
+    avatar: "https://github.com/shadcn.png",
+    fallback: "04",
+    content: `
+      A queue is a linear data structure that follows the First In, First Out (FIFO) principle.
+      It is used for storing data in a way that the first element added is the first to be removed.
+      Topics include:
+      - Introduction to queues and their applications.
+      - Queue operations: enqueue, dequeue, front, rear, and isEmpty.
+      - Implementation of queues using arrays and linked lists.
+      - Types of queues: simple queue, circular queue, priority queue, and deque (double-ended queue).
+    `,
+  },
+  // Add more materials as needed
 ];
 
-function StackQueuePage() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const totalMaterials = materials.length;
-
-  const parseMarkdown = (text: string) => {
-    return text.replace(/\*(.*?)\*/g, "<strong>$1</strong>");
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((currentIndex + 1) % totalMaterials);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((currentIndex - 1 + totalMaterials) % totalMaterials);
-  };
-
-  const handleReadMore = (index: number) => {
-    setCurrentIndex(index);
-  };
-
+export default function RoomPage() {
   return (
     <div className="flex justify-between p-4 space-x-4">
       {/* Course Outline */}
@@ -201,5 +192,3 @@ function StackQueuePage() {
     </div>
   );
 }
-
-export default withAuth(StackQueuePage, true);

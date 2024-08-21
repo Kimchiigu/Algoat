@@ -29,6 +29,7 @@ import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import { Textarea } from "@/components/ui/textarea";
+import withAuth from "@/hoc/withAuth";
 
 interface QuestionResponse {
   question: string;
@@ -75,7 +76,7 @@ const PlayPage = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [question, setQuestion] = useState<string | null>(null);
   const [answer, setAnswer] = useState<string>("");
-  const [timer, setTimer] = useState<number>(9999);
+  const [timer, setTimer] = useState<number>(60);
   const [startTime, setStartTime] = useState<any>();
   const [phase, setPhase] = useState<
     "question" | "answer" | "judging" | "ended" | "leaderboard"
@@ -173,9 +174,7 @@ const PlayPage = () => {
       const { data } = await axios.get<QuestionResponse>(
         `/get_question/${session_id}`
       );
-      setStartTime(data?.phaseTime);
       setQuestion(data.question);
-      setPhase("question");
     } catch (error) {
       console.error("Error fetching question:", error);
     }
@@ -188,9 +187,8 @@ const PlayPage = () => {
       try {
         const { data } = await axios.post(`/check_game_state/${sessionId}`);
         if (data.status === "question") {
-          setPhase("question");
           fetchQuestion(sessionId);
-          setTimer(15);
+          setPhase("question");
           console.log("question");
         } else if (data.status === "answer") {
           setPhase("answer");
@@ -214,16 +212,16 @@ const PlayPage = () => {
           return () => clearTimeout(timeoutId);
         }
         // Update current question index
-        setStartTime(data?.phaseTime);
         const gameDoc = await getDoc(doc(db, "Games", sessionId));
+        const gameData = gameDoc.data();
+        setStartTime(gameData?.phase_start_time);
         if (gameDoc.exists()) {
-          const gameData = gameDoc.data();
-          setCurrentQuestionIndex(gameData.current_question_index || 0);
+          setCurrentQuestionIndex(gameData?.current_question_index || 0);
         }
       } catch (error) {
         console.error("Error checking game state:", error);
       }
-    }, 5000); // check every 5 seconds
+    }, 1000); // check every 5 seconds
 
     return () => clearInterval(intervalId);
   }, [sessionId]);
@@ -271,8 +269,8 @@ const PlayPage = () => {
 
   useEffect(() => {
     const currentTime = new Date();
-    if (!startTime) return;
     console.log(startTime);
+    if (!startTime) return;
     if (timer > 0) {
       if (phase === "answer") {
         const timeoutId = setTimeout(() => {
@@ -280,12 +278,6 @@ const PlayPage = () => {
             answerTime * 60 -
               (currentTime.getTime() - new Date(startTime).getTime()) / 1000
           );
-          setTimer(newTimer);
-        }, 1000);
-        return () => clearTimeout(timeoutId);
-      } else {
-        const timeoutId = setTimeout(() => {
-          const newTimer = timer - 1;
           setTimer(newTimer);
         }, 1000);
         return () => clearTimeout(timeoutId);
@@ -308,13 +300,6 @@ const PlayPage = () => {
             </h1>
             <p className="text-xl">{question}</p>
             <p className="text-sm">Read the question carefully</p>
-            <p className="text-sm">{timer}</p>
-            <div className="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-destructive"
-                style={{ width: `${(timer / 10) * 100}%` }}
-              ></div>
-            </div>
           </div>
         )}
 
@@ -398,4 +383,4 @@ const PlayPage = () => {
   );
 };
 
-export default PlayPage;
+export default withAuth(PlayPage, true);

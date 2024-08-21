@@ -20,8 +20,9 @@ import { useDropzone } from "react-dropzone";
 import FilePreview from "@/components/file-preview";
 import { useFetchForumDetail } from "@/hooks/forum-detail-hooks";
 import { useForumReplies } from "@/hooks/forum-replies";
+import withAuth from "@/hoc/withAuth";
 
-export default function ForumDetail() {
+function ForumDetail() {
   const params = useParams();
   const { forumId, forumTitle } = params as {
     forumId: string;
@@ -249,3 +250,5 @@ export default function ForumDetail() {
     </div>
   );
 }
+
+export default withAuth(ForumDetail, true);

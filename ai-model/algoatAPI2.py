@@ -58,7 +58,7 @@ class StartGameRequest(BaseModel):
 
 class QuestionResponse(BaseModel):
     question: str
-    timer: int
+    phaseTime: str
 
 class ScoreResponse(BaseModel):
     player: str
@@ -190,7 +190,8 @@ def get_question(session_id: str):
         raise HTTPException(status_code=404, detail="No more questions available")
 
     question = questions[current_question_index]["question"]
-    return QuestionResponse(question=question, timer=5)
+    current_time = datetime.now().isoformat()
+    return QuestionResponse(question=question, phaseTime=current_time)
 
 @app.post("/submit_answer/{session_id}")
 def submit_answer(session_id: str, answer: Answer):

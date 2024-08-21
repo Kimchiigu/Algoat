@@ -4,10 +4,8 @@ import { useCallback, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
-import Link from "next/link";
-import { Progress } from "@/components/ui/progress";
 import GoBack from "@/components/go-back";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -16,11 +14,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
+import withAuth from "@/hoc/withAuth";
+import { useRouter } from "next/navigation";
 
 interface CardContentProps {
   imageSrc: string;
   title: string;
   description: string;
+  href: string;
 }
 
 const cardData: CardContentProps[] = [
@@ -28,31 +29,37 @@ const cardData: CardContentProps[] = [
     imageSrc: "/material/algorithm-programming.png",
     title: "Stack & Queue",
     description: "Learn the fundamentals of algorithms and their applications.",
+    href: "/learning/material/data-structures/stack-and-queue",
   },
   {
     imageSrc: "/material/data-structures.png",
     title: "Hash Table",
     description: "Understand different data structures and their uses.",
+    href: "/learning/material/data-structures/hash-table",
   },
   {
     imageSrc: "/material/design-pattern.png",
     title: "Binary Tree",
     description: "Explore common design patterns used in software development.",
+    href: "/learning/material/data-structures/binary-tree",
   },
   {
     imageSrc: "/material/software-architecture.png",
     title: "AVL Tree",
     description:
       "Study the principles of designing robust software architectures.",
+    href: "/learning/material/data-structures/avl-tree",
   },
   {
     imageSrc: "/material/web-design.png",
     title: "Red Black Tree",
     description: "Learn the essentials of designing user-friendly websites.",
+    href: "/learning/material/data-structures/rbt",
   },
 ];
 
-export default function MaterialPage() {
+function DataStructuresPage() {
+  const router = useRouter();
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
   }, []);
@@ -87,18 +94,22 @@ export default function MaterialPage() {
           opts={{
             align: "start",
           }}
-          className="w-full max-w-7xl" // Adjust the max width of the carousel
+          className="w-full max-w-7xl"
         >
           <CarouselContent>
             {cardData.map((card, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+              <CarouselItem
+                key={index}
+                className="md:basis-1/2 lg:basis-1/3"
+                onClick={() => router.push(card.href)}
+              >
                 <div className="p-4">
                   {" "}
-                  {/* Increase padding */}
                   <HoverCard
                     imageSrc={card.imageSrc}
                     title={card.title}
                     description={card.description}
+                    href={card.href}
                   />
                 </div>
               </CarouselItem>
@@ -117,7 +128,7 @@ function HoverCard({ imageSrc, title, description }: CardContentProps) {
 
   return (
     <Card
-      className="relative flex flex-col items-center rounded-xl shadow-md w-[400px] h-[400px] cursor-pointer p-2" // Set width and height
+      className="relative flex flex-col items-center rounded-xl shadow-md w-[400px] h-[400px] cursor-pointer p-2"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -147,3 +158,5 @@ function HoverCard({ imageSrc, title, description }: CardContentProps) {
     </Card>
   );
 }
+
+export default withAuth(DataStructuresPage, true);
