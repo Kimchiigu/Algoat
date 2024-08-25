@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Crown } from "lucide-react";
 import withAuth from "@/hoc/withAuth";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const materials = [
   {
