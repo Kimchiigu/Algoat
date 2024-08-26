@@ -77,6 +77,10 @@ class LeaderboardEntry(BaseModel):
 class LeaderboardResponse(BaseModel):
     leaderboard: List[LeaderboardEntry]
 
+class QuestionRequest(BaseModel):
+    question: str
+    context: str
+
 # Load the dataset
 def load_dataset(base_path):
     data = []
@@ -374,6 +378,28 @@ def end_game(session_id: str):
     db.collection("Games").document(session_id).delete()
 
     return {"message": "Game Ended"}
+
+from pydantic import BaseModel
+from transformers import pipeline, BertTokenizerFast, AlbertForQuestionAnswering
+
+# Load the fine-tuned model and tokenizer
+tokenizer = BertTokenizerFast.from_pretrained('Wikidepia/indobert-lite-squad')
+model = AlbertForQuestionAnswering.from_pretrained('Wikidepia/indobert-lite-squad')
+
+# Create the QA pipeline
+qa_pipeline = pipeline(
+    "question-answering",
+    model=model,
+    tokenizer=tokenizer
+)
+
+@app.post("/answer/")
+async def get_answer(question_request: QuestionRequest):
+    result = qa_pipeline({
+        'context': question_request.context,
+        'question': question_request.question
+    })
+    return {"answer": result['answer']}
 
 # To run the API, use the command: uvicorn script_name:app --reload
 # Replace 'script_name' with the name of your script file
