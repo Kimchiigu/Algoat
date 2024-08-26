@@ -3,8 +3,6 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { VolumeProvider } from "@/lib/VolumeContext";
-import BackgroundAudio from "@/components/background-audio";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -43,10 +41,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <VolumeProvider>
-            <BackgroundAudio />
-            {children}
-          </VolumeProvider>
+          {children}
           <Toaster />
         </ThemeProvider>
       </body>

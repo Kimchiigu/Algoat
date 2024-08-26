@@ -29,21 +29,12 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { useVolume } from "@/lib/VolumeContext";
-import BackgroundAudio from "@/components/background-audio";
 import { useRouter } from "next/navigation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 function HomePage() {
   const { setTheme } = useTheme();
   const router = useRouter();
   const { isLoading, fetchUserInfo } = useUserStore();
-  const { volume, setVolume } = useVolume();
 
   const greetings = [
     "Hello!",
@@ -86,18 +77,8 @@ function HomePage() {
     );
   }
 
-  const getVolumeIcon = () => {
-    if (volume === 0) return <VolumeX />;
-    if (volume < 30) return <Volume />;
-    if (volume >= 30 && volume < 70) return <Volume1 />;
-    return <Volume2 />;
-  };
-
   return (
     <div className="relative w-full min-h-screen">
-      {/* Background Audio */}
-      <BackgroundAudio />
-
       {/* Particles Background */}
       <Particles
         id="tsparticles"
@@ -155,47 +136,6 @@ function HomePage() {
         {/* Footer */}
         <div className="flex justify-between items-center w-full p-4 absolute bottom-0">
           <div className="flex row justify-center items-center">
-            <Button variant="ghost" className="p-8">
-              <Settings />
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="p-8">
-                  <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">Toggle theme</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
-                  Light
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                  Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                  System
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <HoverCard>
-              <HoverCardTrigger>
-                <Button variant="ghost" className="p-8">
-                  {getVolumeIcon()}
-                </Button>
-              </HoverCardTrigger>
-              <HoverCardContent>
-                <Slider
-                  value={[volume]}
-                  onValueChange={(value) => setVolume(value[0])}
-                  max={100}
-                  step={1}
-                />
-              </HoverCardContent>
-            </HoverCard>
-
             <Button onClick={handleLogout} variant="ghost" className="p-8">
               <LogOut className="text-red-500" />
             </Button>
