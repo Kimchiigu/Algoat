@@ -145,6 +145,16 @@ function AVLTreePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalMaterials = materials.length;
 
+  const [userInput, setUserInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<
+    { user: boolean; message: string }[]
+  >([
+    {
+      user: false,
+      message: "Halo! Bagaimana saya bisa membantu Anda hari ini?",
+    },
+  ]);
+
   const parseMarkdown = (text: string) => {
     return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   };
@@ -159,6 +169,56 @@ function AVLTreePage() {
 
   const handleReadMore = (index: number) => {
     setCurrentIndex(index);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserInput(e.target.value);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Add user's message to the chat
+    setChatMessages((prevMessages) => [
+      ...prevMessages,
+      { user: true, message: userInput },
+    ]);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/answer/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: userInput,
+          context: `
+            AVL Tree adalah jenis Balanced Binary Tree yang pertama kali diperkenalkan oleh Adelson-Velsky dan Landis pada tahun 1962. AVL Tree adalah salah satu varian dari Binary Search Tree (BST) yang memiliki mekanisme otomatis untuk menjaga keseimbangan tinggi dari pohon biner setelah setiap operasi penyisipan dan penghapusan. Keseimbangan ini dicapai dengan memastikan bahwa perbedaan tinggi antara anak kiri dan anak kanan dari setiap node tidak lebih dari satu.
+
+            AVL Tree menggunakan rotasi untuk menjaga keseimbangan pohon. Rotasi ini dapat berupa rotasi tunggal atau ganda, tergantung pada kondisi keseimbangan setelah operasi penyisipan atau penghapusan.
+
+            Operasi pencarian dalam AVL Tree sangat mirip dengan pencarian dalam Binary Search Tree (BST). Proses pencarian dimulai dari root dan terus turun ke anak kiri atau anak kanan berdasarkan nilai yang dicari. Karena AVL Tree selalu seimbang, waktu pencarian dalam AVL Tree selalu berada dalam O(log n).
+
+            Penyisipan dalam AVL Tree dimulai dengan menambahkan node baru ke pohon seperti dalam Binary Search Tree (BST). Setelah node baru ditambahkan, keseimbangan pohon diperiksa. Jika pohon menjadi tidak seimbang, rotasi dilakukan untuk mengembalikan keseimbangan. Kompleksitas waktu penyisipan dalam AVL Tree adalah O(log n).
+
+            Penghapusan dalam AVL Tree melibatkan dua langkah utama: menghapus node dari pohon seperti dalam Binary Search Tree (BST) dan kemudian memulihkan keseimbangan jika pohon menjadi tidak seimbang. Kompleksitas waktu penghapusan dalam AVL Tree adalah O(log n).
+
+            Rotasi adalah operasi kunci dalam AVL Tree yang digunakan untuk memulihkan keseimbangan setelah pohon menjadi tidak seimbang akibat penyisipan atau penghapusan. Ada dua jenis rotasi dasar dalam AVL Tree: rotasi tunggal dan rotasi ganda.
+
+            AVL Tree banyak digunakan dalam aplikasi di mana efisiensi dan konsistensi waktu pencarian sangat penting. Beberapa contoh aplikasi dari AVL Tree termasuk sistem basis data, sistem pencarian informasi, aplikasi pengurutan, manajemen memori, dan jaringan komputer.
+          `,
+        }),
+      });
+      const data = await response.json();
+      setChatMessages((prevMessages) => [
+        ...prevMessages,
+        { user: false, message: data.answer },
+      ]);
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+    }
+
+    setUserInput(""); // Clear the input field
   };
 
   return (
@@ -243,12 +303,32 @@ function AVLTreePage() {
         <CardHeader>
           <CardTitle>Ask AI-Goat</CardTitle>
         </CardHeader>
-        <CardContent className="flex-grow bg-slate-900 rounded-md">
-          {/* Messages area, replace with actual chat implementation */}
+        <CardContent className="flex-grow bg-slate-900 rounded-md overflow-hidden">
+          <ScrollArea className="h-full p-4 overflow-y-auto">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`mb-4 p-2 rounded-lg ${
+                  msg.user
+                    ? "text-right ml-16 bg-blue-600"
+                    : "text-left mr-16 bg-gray-600"
+                }`}
+              >
+                <p className="text-white">{msg.message}</p>
+              </div>
+            ))}
+          </ScrollArea>
         </CardContent>
-        <CardFooter className="mt-5 w-full flex space-x-2">
-          <Input className="flex-grow" placeholder="Type your message" />
-          <Button type="submit">Send</Button>
+        <CardFooter className="w-full flex space-x-2">
+          <form onSubmit={handleFormSubmit} className="w-full flex space-x-2">
+            <Input
+              className="flex-grow"
+              placeholder="Type your message"
+              value={userInput}
+              onChange={handleInputChange}
+            />
+            <Button type="submit">Send</Button>
+          </form>
         </CardFooter>
       </Card>
     </div>

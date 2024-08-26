@@ -135,6 +135,16 @@ function BinaryTreePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalMaterials = materials.length;
 
+  const [userInput, setUserInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<
+    { user: boolean; message: string }[]
+  >([
+    {
+      user: false,
+      message: "Halo! Bagaimana saya bisa membantu Anda hari ini?",
+    },
+  ]);
+
   const parseMarkdown = (text: string) => {
     return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   };
@@ -149,6 +159,52 @@ function BinaryTreePage() {
 
   const handleReadMore = (index: number) => {
     setCurrentIndex(index);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserInput(e.target.value);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Add user's message to the chat
+    setChatMessages((prevMessages) => [
+      ...prevMessages,
+      { user: true, message: userInput },
+    ]);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/answer/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: userInput,
+          context: `
+            Binary Tree adalah salah satu struktur data yang paling dasar dan penting dalam ilmu komputer. Struktur ini berbentuk hierarkis, di mana setiap elemen atau node dalam tree memiliki maksimal dua anak yang disebut sebagai anak kiri dan anak kanan. Binary Tree digunakan untuk menyimpan dan mengorganisasi data dengan cara yang memungkinkan akses dan modifikasi data dilakukan secara efisien.
+
+            Binary Search Tree (BST) adalah jenis Binary Tree di mana setiap node mengikuti aturan bahwa nilai yang ada di anak kiri lebih kecil dari nilai node itu sendiri, dan nilai di anak kanan lebih besar. BST memberikan cara yang efisien untuk mencari, menyisipkan, dan menghapus data.
+
+            Binary Tree Traversal adalah proses mengunjungi semua node dalam Binary Tree dalam urutan tertentu. Traversal ini penting untuk banyak operasi tree seperti pencarian, penyisipan, penghapusan, dan pengolahan data. Ada beberapa jenis traversal, termasuk inorder, preorder, postorder, dan level order.
+
+            Balanced Binary Tree adalah Binary Tree di mana perbedaan tinggi antara anak kiri dan anak kanan dari setiap node tidak lebih dari satu. AVL Tree, Red-Black Tree, dan B-Tree adalah contoh dari Balanced Binary Tree, yang memastikan bahwa operasi pada tree tetap efisien dengan menjaga waktu operasi tetap logaritmik.
+
+            Binary Tree digunakan dalam berbagai aplikasi penting di ilmu komputer, seperti algoritma pencarian, pengurutan, dan struktur data kompleks seperti heap dan trie. Dalam basis data, Binary Tree digunakan untuk mengindeks data, yang memungkinkan akses cepat ke data yang disimpan.
+          `,
+        }),
+      });
+      const data = await response.json();
+      setChatMessages((prevMessages) => [
+        ...prevMessages,
+        { user: false, message: data.answer },
+      ]);
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+    }
+
+    setUserInput(""); // Clear the input field
   };
 
   return (
@@ -233,12 +289,32 @@ function BinaryTreePage() {
         <CardHeader>
           <CardTitle>Ask AI-Goat</CardTitle>
         </CardHeader>
-        <CardContent className="flex-grow bg-slate-900 rounded-md">
-          {/* Messages area, replace with actual chat implementation */}
+        <CardContent className="flex-grow bg-slate-900 rounded-md overflow-hidden">
+          <ScrollArea className="h-full p-4 overflow-y-auto">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`mb-4 p-2 rounded-lg ${
+                  msg.user
+                    ? "text-right ml-16 bg-blue-600"
+                    : "text-left mr-16 bg-gray-600"
+                }`}
+              >
+                <p className="text-white">{msg.message}</p>
+              </div>
+            ))}
+          </ScrollArea>
         </CardContent>
-        <CardFooter className="mt-5 w-full flex space-x-2">
-          <Input className="flex-grow" placeholder="Type your message" />
-          <Button type="submit">Send</Button>
+        <CardFooter className="w-full flex space-x-2">
+          <form onSubmit={handleFormSubmit} className="w-full flex space-x-2">
+            <Input
+              className="flex-grow"
+              placeholder="Type your message"
+              value={userInput}
+              onChange={handleInputChange}
+            />
+            <Button type="submit">Send</Button>
+          </form>
         </CardFooter>
       </Card>
     </div>

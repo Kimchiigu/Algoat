@@ -116,6 +116,57 @@ export default function RoomPage() {
     setCurrentIndex(index);
   };
 
+  const [userInput, setUserInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<
+    { user: boolean; message: string }[]
+  >([
+    {
+      user: false,
+      message: "Halo! Bagaimana saya bisa membantu Anda hari ini?",
+    },
+  ]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserInput(e.target.value);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setChatMessages((prevMessages) => [
+      ...prevMessages,
+      { user: true, message: userInput },
+    ]);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/answer/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: userInput,
+          context: `
+            Stack adalah struktur data linear yang mengikuti prinsip Last In, First Out (LIFO), di mana elemen yang terakhir ditambahkan adalah yang pertama dihapus. Struktur ini mirip dengan tumpukan buku di mana buku yang paling atas adalah yang pertama kali diambil. Operasi dasar pada stack meliputi Push, Pop, Peek, dan isEmpty.
+
+            Queue adalah struktur data linear yang mengikuti prinsip First In, First Out (FIFO), di mana elemen yang pertama kali ditambahkan adalah yang pertama kali dihapus. Queue dapat diimplementasikan menggunakan array atau linked list, dan sering digunakan dalam berbagai aplikasi seperti manajemen antrean dan pemrosesan antrian printer.
+
+            Stack dan Queue adalah dua struktur data fundamental yang sering digunakan dalam pemrograman. Meskipun keduanya memiliki perbedaan mendasar dalam cara data diakses, keduanya sangat berguna dalam berbagai situasi. Implementasi yang tepat dari struktur data ini dapat meningkatkan efisiensi algoritma secara signifikan.
+          `,
+        }),
+      });
+      const data = await response.json();
+      setChatMessages((prevMessages) => [
+        ...prevMessages,
+        { user: false, message: data.answer },
+      ]);
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+    }
+
+    setUserInput(""); // Clear the input field
+  };
+
   return (
     <div className="flex justify-between p-4 space-x-4">
       {/* Course Outline */}
@@ -163,7 +214,11 @@ export default function RoomPage() {
           </ScrollArea>
         </CardContent>
         <CardFooter>
-          <Button variant="default" className="w-full">
+          <Button
+            variant="default"
+            className="w-full"
+            onClick={() => router.push("/learning/material/data-structures")}
+          >
             Go Back
           </Button>
         </CardFooter>
@@ -197,16 +252,37 @@ export default function RoomPage() {
         </CardContent>
       </Card>
 
+      {/* Ask AI-Goat */}
       <Card className="flex flex-col w-1/4 h-screen p-4">
         <CardHeader>
           <CardTitle>Ask AI-Goat</CardTitle>
         </CardHeader>
-        <CardContent className="flex-grow bg-slate-900 rounded-md">
-          {/* Messages area, replace with actual chat implementation */}
+        <CardContent className="flex-grow bg-slate-900 rounded-md overflow-hidden">
+          <ScrollArea className="h-full p-4 overflow-y-auto">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`mb-4 p-2 rounded-lg ${
+                  msg.user
+                    ? "text-right ml-16 bg-blue-600"
+                    : "text-left mr-16 bg-gray-600"
+                }`}
+              >
+                <p className="text-white">{msg.message}</p>
+              </div>
+            ))}
+          </ScrollArea>
         </CardContent>
-        <CardFooter className="mt-5 w-full flex space-x-2">
-          <Input className="flex-grow" placeholder="Type your message" />
-          <Button type="submit">Send</Button>
+        <CardFooter className="w-full flex space-x-2">
+          <form onSubmit={handleFormSubmit} className="w-full flex space-x-2">
+            <Input
+              className="flex-grow"
+              placeholder="Type your message"
+              value={userInput}
+              onChange={handleInputChange}
+            />
+            <Button type="submit">Send</Button>
+          </form>
         </CardFooter>
       </Card>
     </div>
