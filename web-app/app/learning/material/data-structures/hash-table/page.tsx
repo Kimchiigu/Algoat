@@ -158,16 +158,14 @@ function HashTablePage() {
     ]);
 
     try {
-      const response = await fetch(
-        "https://algoat-api-aqg5gqeac7bje7bf.eastus-01.azurewebsites.net/answer/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: userInput,
-            context: `
+      const response = await fetch("http://localhost:8000/answer/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: userInput,
+          context: `
             Hash table adalah struktur data yang digunakan untuk menyimpan pasangan kunci-nilai, di mana setiap kunci unik dipetakan ke dalam sebuah nilai dengan menggunakan fungsi hash. Fungsi hash mengambil kunci dan mengonversinya menjadi indeks dalam array untuk menyimpan nilai. Dengan cara ini, operasi pencarian, penyisipan, dan penghapusan data dapat dilakukan dengan waktu yang sangat cepat, biasanya O(1), dalam kondisi ideal.
             Namun, hash table juga memiliki beberapa tantangan. Salah satu masalah utama adalah tabrakan (collision), yang terjadi ketika dua kunci yang berbeda di-hash menjadi indeks yang sama dalam array. Ada beberapa metode untuk menangani tabrakan ini. Metode pertama adalah chaining, di mana setiap elemen dalam array menyimpan sebuah linked list atau struktur data lain yang menyimpan semua pasangan kunci-nilai yang memiliki indeks hash yang sama. Metode kedua adalah open addressing, di mana jika terjadi tabrakan, elemen akan ditempatkan di slot berikutnya yang tersedia dalam array.
             Fungsi hash yang baik harus mendistribusikan kunci-kunci secara merata di seluruh array untuk mengurangi kemungkinan tabrakan. Fungsi hash yang buruk, di sisi lain, dapat menyebabkan banyak tabrakan dan menurunkan efisiensi struktur data tersebut.
@@ -178,9 +176,8 @@ function HashTablePage() {
             Selain itu, penting untuk memperhatikan pemilihan fungsi hash. Fungsi hash yang baik harus memiliki distribusi yang merata dan mengurangi kemungkinan collision. Fungsi hash yang buruk dapat menyebabkan cluster collision, di mana banyak kunci berbeda menghasilkan indeks hash yang sama, yang pada akhirnya akan mengurangi efisiensi hash table.
             Pada akhirnya, hash table adalah alat yang sangat berguna dalam pemrograman, namun penggunaannya memerlukan pemahaman mendalam tentang bagaimana struktur data ini bekerja serta cara mengoptimalkan kinerjanya melalui pemilihan fungsi hash yang tepat dan teknik penanganan collision yang efektif.
           `,
-          }),
-        }
-      );
+        }),
+      });
       const data = await response.json();
       setChatMessages((prevMessages) => [
         ...prevMessages,

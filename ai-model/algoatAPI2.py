@@ -13,6 +13,7 @@ import uuid
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, firestore
+import time
 
 # Firebase Admin SDK setup
 cred = credentials.Certificate("firebase-service.json")  # Replace with your Firebase service account key file
@@ -53,6 +54,7 @@ class StartGameRequest(BaseModel):
     room_id: str
     participants: List[str]
     category: str
+    owner: str
     num_questions: int  # Add num_questions field
     answer_time: int  # Add answer_time field
 
@@ -81,6 +83,9 @@ class QuestionRequest(BaseModel):
     question: str
     context: str
 
+class CheckGameStateRequest(BaseModel):
+    userId: str
+
 # Load the dataset
 def load_dataset(base_path):
     data = []
@@ -106,9 +111,12 @@ def load_dataset(base_path):
 
 def encode_text(text):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
+    
     with torch.no_grad():
         outputs = model(**inputs)
-    return outputs.last_hidden_state.mean(dim=1).squeeze().numpy().tolist()  # Convert to list
+    
+    return outputs.last_hidden_state.mean(dim=1).squeeze().numpy().tolist()
+
 
 def encode_context(text):
     return sbert_model.encode(text).tolist()  # Convert to list
@@ -170,7 +178,9 @@ def start_game(request: StartGameRequest):
         "phase": "question",  # Initial phase
         "phase_start_time": datetime.now().isoformat(),
         "participants": participants,
-        "answer_time": request.answer_time,  # Store answer time
+        "answer_time": request.answer_time,  # Store answer time,
+        "owner" : request.owner,
+        "correction": 1,
         "num_questions": request.num_questions  # Store number of questions
     })
     # Save participants in a sub-collection
@@ -220,7 +230,8 @@ def submit_answer(session_id: str, answer: Answer):
     db.collection("Games").document(session_id).update({"submitted_answers": current_count})
     
 @app.post("/check_game_state/{session_id}")
-def check_game_state(session_id: str):
+def check_game_state(session_id: str, request: CheckGameStateRequest):
+    user_id = request.userId
     game_doc = db.collection("Games").document(session_id).get()
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -233,7 +244,7 @@ def check_game_state(session_id: str):
     phase_start_time = datetime.fromisoformat(game_data["phase_start_time"])
 
     if game_data["phase"] == "question":
-        if (current_time - phase_start_time).seconds >= 10:
+        if (current_time - phase_start_time).seconds + 1 >= 10:
             db.collection("Games").document(session_id).update({
                 "phase": "answer",
                 "phase_start_time": current_time.isoformat()
@@ -241,8 +252,13 @@ def check_game_state(session_id: str):
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
-        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
-            calculate_scores(session_id)
+        if (current_time - phase_start_time).seconds + 1 >= (game_data["answer_time"] * 60):
+            print("CHECK:", user_id, game_data["owner"], game_data["answer_time"], current_time - phase_start_time)
+            if(game_data["owner"] == user_id and game_data["correction"] == 1):
+                calculate_scores(session_id)
+                db.collection("Games").document(session_id).update({
+                "correction": game_data["correction"] + 1
+                })
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
                 "phase_start_time": current_time.isoformat()
@@ -252,16 +268,17 @@ def check_game_state(session_id: str):
             return {"status": "answer", "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "judging":
-        if (current_time - phase_start_time).seconds >= 5:
+        if (current_time - phase_start_time).seconds + 1 >= 5:
             next_question_index = game_data["current_question_index"] + 1
             db.collection("Games").document(session_id).update({
                 "phase": "leaderboard",
-                "phase_start_time": current_time.isoformat()
+                "phase_start_time": current_time.isoformat(),
+                "correction": 1
             })
             return {"status": "leaderboard"}
     
     elif game_data["phase"] == "leaderboard":
-        if (current_time - phase_start_time).seconds >= 5:  # Show leaderboard for 10 seconds
+        if (current_time - phase_start_time).seconds + 1 >= 5:  # Show leaderboard for 10 seconds
             next_question_index = game_data["current_question_index"]
             if next_question_index < len(game_data["questions"]):
                 db.collection("Games").document(session_id).update({
@@ -314,7 +331,7 @@ def calculate_scores(session_id: str):
     for answer in answers:
         best_text, best_score = get_best_score(answer.answer, category_df)
         scores.append(ScoreResponse(player=answer.player, username=answer.username, score=best_score))
-
+    print(scores)
     winner = ''
     if scores:
         winner_score = max(scores, key=lambda x: x.score)
@@ -383,14 +400,15 @@ from pydantic import BaseModel
 from transformers import pipeline, BertTokenizerFast, AlbertForQuestionAnswering
 
 # Load the fine-tuned model and tokenizer
-tokenizer = BertTokenizerFast.from_pretrained('Wikidepia/indobert-lite-squad')
-model = AlbertForQuestionAnswering.from_pretrained('Wikidepia/indobert-lite-squad')
+# Initialize the tokenizer and model for the chatbot
+tokenizer_chatbot = BertTokenizerFast.from_pretrained('Wikidepia/indobert-lite-squad')
+model_chatbot = AlbertForQuestionAnswering.from_pretrained('Wikidepia/indobert-lite-squad')
 
-# Create the QA pipeline
+# Create the QA pipeline using the chatbot model and tokenizer
 qa_pipeline = pipeline(
     "question-answering",
-    model=model,
-    tokenizer=tokenizer
+    model=model_chatbot,      # Use model_chatbot instead of model
+    tokenizer=tokenizer_chatbot  # Use tokenizer_chatbot instead of tokenizer
 )
 
 @app.post("/answer/")

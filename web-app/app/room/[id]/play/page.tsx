@@ -75,7 +75,7 @@ const PlayPage = () => {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [question, setQuestion] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string>("");
+  const [answer, setAnswer] = useState<string>(" ");
   const [timer, setTimer] = useState<number>(60);
   const [startTime, setStartTime] = useState<any>();
   const [phase, setPhase] = useState<
@@ -126,7 +126,6 @@ const PlayPage = () => {
       if (unsubscribePlayers) unsubscribePlayers();
     };
   };
-
   useEffect(() => {
     if (!id) return;
 
@@ -141,6 +140,7 @@ const PlayPage = () => {
       const category = roomData?.topic;
 
       const numQuestions = roomData?.numQuestions || 5;
+      const ownerId = roomData?.ownerId || "";
       setAnswerTime(roomData?.answerTime || 1);
       console.log(id as string);
       console.log(answerTime);
@@ -150,22 +150,27 @@ const PlayPage = () => {
         fetchQuestion(sessionId);
       } else {
         // Wait until playersList is set
-        if (playersList.length > 0) {
-          const { data } = await axios.post("/start_game", {
-            room_id: id as string,
-            participants: playersList?.map((player) => player.userName),
-            category: category,
-            num_questions: numQuestions,
-            answer_time: answerTime,
-          });
-          setStartTime(data?.phase_start_time);
-          setSessionId(data.session_id);
-          await updateDoc(roomDocRef, { sessionId: data.session_id });
-          fetchQuestion(data.session_id);
+        if (roomDoc.data()?.ownerId === currentUser?.id) {
+          if (playersList.length > 0) {
+            const { data } = await axios.post("/start_game", {
+              room_id: id as string,
+              participants: playersList?.map((player) => player.userName),
+              category: category,
+              num_questions: numQuestions,
+              owner: ownerId,
+              answer_time: answerTime,
+            });
+            setStartTime(data?.phase_start_time);
+            setSessionId(data.session_id);
+            await updateDoc(roomDocRef, { sessionId: data.session_id });
+            fetchQuestion(data.session_id);
+          }
+        } else {
+          await new Promise((r) => setTimeout(r, 1010));
+          fetchSessionId();
         }
       }
     };
-
     fetchSessionId();
   }, [id]);
 
@@ -185,9 +190,17 @@ const PlayPage = () => {
 
     const intervalId = setInterval(async () => {
       try {
-        const { data } = await axios.post(`/check_game_state/${sessionId}`);
+        console.log(currentUser?.id);
+        const { data } = await axios.post(`/check_game_state/${sessionId}`, {
+          userId: currentUser?.id || "",
+        });
+        if (phase != data.status) {
+          await new Promise((r) => setTimeout(r, 1000));
+        }
         if (data.status === "question") {
           fetchQuestion(sessionId);
+          setAnswer("");
+          setIsLock(false);
           setPhase("question");
           console.log("question");
         } else if (data.status === "answer") {
@@ -204,11 +217,11 @@ const PlayPage = () => {
           fetchLeaderboard(sessionId);
         } else if (data.status === "ended") {
           setPhase("ended");
-          const data = await axios.post(`/end_game/${sessionId}`);
           setMessage(`Game Ended`);
           const timeoutId = setTimeout(() => {
             router.push(`/room/${id}`);
           }, 5000);
+          const data = await axios.post(`/end_game/${sessionId}`);
           return () => clearTimeout(timeoutId);
         }
         // Update current question index
@@ -221,7 +234,7 @@ const PlayPage = () => {
       } catch (error) {
         console.error("Error checking game state:", error);
       }
-    }, 1000); // check every 5 seconds
+    }, 1000); // check every 1 seconds
 
     return () => clearInterval(intervalId);
   }, [sessionId]);
@@ -253,25 +266,11 @@ const PlayPage = () => {
     }
   };
 
-  const calculateScores = async () => {
-    if (!sessionId) return;
-    try {
-      const { data } = await axios.post<JudgementResponse>(
-        `/calculate_scores/${sessionId}`
-      );
-      setMessage(`Winner: ${data.winner}`);
-      setPhase("question");
-      fetchQuestion(sessionId);
-    } catch (error) {
-      console.error("Error calculating scores:", error);
-    }
-  };
-
   useEffect(() => {
     const currentTime = new Date();
     console.log(startTime);
     if (!startTime) return;
-    if (timer > 0) {
+    if (timer) {
       if (phase === "answer") {
         const timeoutId = setTimeout(() => {
           const newTimer = Math.round(
@@ -284,6 +283,10 @@ const PlayPage = () => {
       }
     }
   }, [timer, phase]);
+
+  const handleChange = (event: any) => {
+    setAnswer(event.target.value);
+  };
 
   return (
     <div className="relative w-full min-h-screen">
@@ -298,7 +301,7 @@ const PlayPage = () => {
             <h1 className="text-4xl font-bold">
               Round {currentQuestionIndex + 1}
             </h1>
-            <p className="text-xl">{question}</p>
+            <p className="text-xl">{question}?</p>
             <p className="text-sm">Read the question carefully</p>
           </div>
         )}
@@ -318,10 +321,13 @@ const PlayPage = () => {
               <div>Round {currentQuestionIndex + 1}</div>
               <div>Timer: {timer}s</div>
             </div>
-            <p className="text-xl mb-4">{question}</p>
+            <p className="text-xl mb-4">{question}?</p>
             <Textarea
               className="w-full p-2 border rounded h-56"
               placeholder="Type your answer here..."
+              value={answer} // Set the value from state
+              onChange={handleChange}
+              disabled={isLock}
             ></Textarea>
             {isLock || (
               <Button
