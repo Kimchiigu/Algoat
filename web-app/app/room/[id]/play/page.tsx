@@ -199,7 +199,7 @@ const PlayPage = () => {
         if (data.status === "question") {
           fetchQuestion(sessionId);
           setAnswer("");
-          setIsLock(true);
+          setIsLock(false);
           setPhase("question");
           console.log("question");
         } else if (data.status === "answer") {
