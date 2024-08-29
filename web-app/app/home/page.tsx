@@ -30,6 +30,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { useRouter } from "next/navigation";
+import { ModeToggle } from "@/components/mode-toggle";
 
 function HomePage() {
   const { setTheme } = useTheme();
@@ -139,6 +140,7 @@ function HomePage() {
             <Button onClick={handleLogout} variant="ghost" className="p-8">
               <LogOut className="text-red-500" />
             </Button>
+            {/* <ModeToggle /> */}
           </div>
           <p className="font-bold mr-5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
             ©Algoat 2024
