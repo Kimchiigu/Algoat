@@ -109,17 +109,11 @@ def load_dataset(base_path):
     return df
 
 def encode_text(text):
-    # Tokenize the input text
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
     
-    # Pass the inputs through the model to get the embeddings
     with torch.no_grad():
         outputs = model(**inputs)
-        print(type(outputs))  # This should print <class 'transformers.modeling_outputs.BaseModelOutputWithPoolingAndCrossAttentions'>
-        print(outputs.keys())
     
-    # The output is a BaseModelOutputWithPoolingAndCrossAttentions which contains `last_hidden_state`
-    # We take the mean of the `last_hidden_state` across the token dimension to get a single vector for the input text
     return outputs.last_hidden_state.mean(dim=1).squeeze().numpy().tolist()
 
 
@@ -256,7 +250,8 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
-        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
+        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*10):
+            print("CHECK:", user_id, game_data["owner"])
             if(game_data["owner"] == user_id):
                 calculate_scores(session_id)
             db.collection("Games").document(session_id).update({
@@ -322,7 +317,6 @@ def calculate_scores(session_id: str):
             print(f"KeyError: {e} in document: {doc_data}")
         except Exception as e:
             print(f"Unexpected error: {e} in document: {doc_data}")
-    print(answer)
 
     # Use local dataset for scoring
     category_df = df[df['category'] == current_question['category']].copy()
