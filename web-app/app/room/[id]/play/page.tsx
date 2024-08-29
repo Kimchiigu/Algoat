@@ -199,6 +199,7 @@ const PlayPage = () => {
         if (data.status === "question") {
           fetchQuestion(sessionId);
           setAnswer("");
+          setIsLock(true);
           setPhase("question");
           console.log("question");
         } else if (data.status === "answer") {
@@ -261,20 +262,6 @@ const PlayPage = () => {
       });
     } catch (error) {
       console.error("Error locking answer:", error);
-    }
-  };
-
-  const calculateScores = async () => {
-    if (!sessionId) return;
-    try {
-      const { data } = await axios.post<JudgementResponse>(
-        `/calculate_scores/${sessionId}`
-      );
-      setMessage(`Winner: ${data.winner}`);
-      setPhase("question");
-      fetchQuestion(sessionId);
-    } catch (error) {
-      console.error("Error calculating scores:", error);
     }
   };
 

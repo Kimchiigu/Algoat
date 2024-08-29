@@ -179,6 +179,7 @@ def start_game(request: StartGameRequest):
         "participants": participants,
         "answer_time": request.answer_time,  # Store answer time,
         "owner" : request.owner,
+        "correction": 1,
         "num_questions": request.num_questions  # Store number of questions
     })
     # Save participants in a sub-collection
@@ -252,8 +253,11 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
     elif game_data["phase"] == "answer":
         if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
             print("CHECK:", user_id, game_data["owner"])
-            if(game_data["owner"] == user_id):
+            if(game_data["owner"] == user_id and game_data["correction"] == 1):
                 calculate_scores(session_id)
+                db.collection("Games").document(session_id).update({
+                "correction": game_data["correction"] + 1
+                })
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
                 "phase_start_time": current_time.isoformat()
@@ -267,7 +271,8 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
             next_question_index = game_data["current_question_index"] + 1
             db.collection("Games").document(session_id).update({
                 "phase": "leaderboard",
-                "phase_start_time": current_time.isoformat()
+                "phase_start_time": current_time.isoformat(),
+                "correction": 1
             })
             return {"status": "leaderboard"}
     
