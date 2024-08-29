@@ -126,7 +126,6 @@ const PlayPage = () => {
       if (unsubscribePlayers) unsubscribePlayers();
     };
   };
-
   useEffect(() => {
     if (!id) return;
 
@@ -211,11 +210,11 @@ const PlayPage = () => {
           fetchLeaderboard(sessionId);
         } else if (data.status === "ended") {
           setPhase("ended");
-          const data = await axios.post(`/end_game/${sessionId}`);
           setMessage(`Game Ended`);
           const timeoutId = setTimeout(() => {
             router.push(`/room/${id}`);
           }, 5000);
+          const data = await axios.post(`/end_game/${sessionId}`);
           return () => clearTimeout(timeoutId);
         }
         // Update current question index
@@ -278,7 +277,7 @@ const PlayPage = () => {
     const currentTime = new Date();
     console.log(startTime);
     if (!startTime) return;
-    if (timer > 0) {
+    if (timer >= 0) {
       if (phase === "answer") {
         const timeoutId = setTimeout(() => {
           const newTimer = Math.round(
