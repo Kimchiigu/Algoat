@@ -196,6 +196,9 @@ const PlayPage = () => {
         const { data } = await axios.post(`/check_game_state/${sessionId}`, {
           userId: currentUser?.id || "",
         });
+        if (phase != data.status) {
+          await new Promise((r) => setTimeout(r, 1000));
+        }
         if (data.status === "question") {
           fetchQuestion(sessionId);
           setAnswer("");
