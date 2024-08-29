@@ -13,6 +13,7 @@ import uuid
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, firestore
+import time
 
 # Firebase Admin SDK setup
 cred = credentials.Certificate("firebase-service.json")  # Replace with your Firebase service account key file
@@ -248,6 +249,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
                 "phase": "answer",
                 "phase_start_time": current_time.isoformat()
             })
+            time.sleep(0.1) 
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
@@ -262,6 +264,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
                 "phase": "judging",
                 "phase_start_time": current_time.isoformat()
             })
+            time.sleep(0.1) 
             return {"status": "judging"}
         else:
             return {"status": "answer", "phaseTime": game_data["phase_start_time"]}
@@ -274,6 +277,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
                 "phase_start_time": current_time.isoformat(),
                 "correction": 1
             })
+            time.sleep(0.1) 
             return {"status": "leaderboard"}
     
     elif game_data["phase"] == "leaderboard":
@@ -284,6 +288,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
                     "phase": "question",
                     "phase_start_time": current_time.isoformat()
                 })
+                time.sleep(0.1) 
                 return {"status": "question"}
             else:
                 db.collection("Games").document(session_id).update({
