@@ -166,12 +166,12 @@ const PlayPage = () => {
             fetchQuestion(data.session_id);
           }
         } else {
-          await new Promise((r) => setTimeout(r, 1000));
+          await new Promise((r) => setTimeout(r, 1010));
           fetchSessionId();
         }
       }
-      fetchSessionId();
     };
+    fetchSessionId();
   }, [id]);
 
   const fetchQuestion = async (session_id: string) => {
