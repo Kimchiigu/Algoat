@@ -150,18 +150,24 @@ const PlayPage = () => {
         fetchQuestion(sessionId);
       } else {
         // Wait until playersList is set
-        if (playersList.length > 0) {
-          const { data } = await axios.post("/start_game", {
-            room_id: id as string,
-            participants: playersList?.map((player) => player.userName),
-            category: category,
-            num_questions: numQuestions,
-            answer_time: answerTime,
-          });
-          setStartTime(data?.phase_start_time);
-          setSessionId(data.session_id);
-          await updateDoc(roomDocRef, { sessionId: data.session_id });
-          fetchQuestion(data.session_id);
+        if (roomDoc.data()?.ownerId === currentUser?.id) {
+          if (playersList.length > 0) {
+            const { data } = await axios.post("/start_game", {
+              room_id: id as string,
+              participants: playersList?.map((player) => player.userName),
+              category: category,
+              num_questions: numQuestions,
+              answer_time: answerTime,
+            });
+            setStartTime(data?.phase_start_time);
+            setSessionId(data.session_id);
+            await updateDoc(roomDocRef, { sessionId: data.session_id });
+            fetchQuestion(data.session_id);
+          }
+        } else {
+          setTimeout(() => {
+            fetchSessionId();
+          }, 1000);
         }
       }
     };
@@ -189,6 +195,7 @@ const PlayPage = () => {
         if (data.status === "question") {
           fetchQuestion(sessionId);
           setPhase("question");
+          setAnswer("");
           console.log("question");
         } else if (data.status === "answer") {
           setPhase("answer");
@@ -328,6 +335,7 @@ const PlayPage = () => {
               placeholder="Type your answer here..."
               value={answer} // Set the value from state
               onChange={handleChange}
+              disabled={isLock}
             ></Textarea>
             {isLock || (
               <Button
