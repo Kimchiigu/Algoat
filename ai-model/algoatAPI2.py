@@ -250,7 +250,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
-        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*10):
+        if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
             print("CHECK:", user_id, game_data["owner"])
             if(game_data["owner"] == user_id):
                 calculate_scores(session_id)
