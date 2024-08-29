@@ -244,7 +244,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
     phase_start_time = datetime.fromisoformat(game_data["phase_start_time"])
 
     if game_data["phase"] == "question":
-        if (current_time - phase_start_time).seconds >= 10:
+        if (current_time - phase_start_time).seconds + 1 >= 10:
             db.collection("Games").document(session_id).update({
                 "phase": "answer",
                 "phase_start_time": current_time.isoformat()
@@ -253,7 +253,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "answer":
-        if (current_time - phase_start_time).seconds >= (game_data["answer_time"] * 60):
+        if (current_time - phase_start_time).seconds + 1 >= (game_data["answer_time"] * 60):
             print("CHECK:", user_id, game_data["owner"], game_data["answer_time"], current_time - phase_start_time)
             if(game_data["owner"] == user_id and game_data["correction"] == 1):
                 calculate_scores(session_id)
@@ -270,7 +270,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
             return {"status": "answer", "phaseTime": game_data["phase_start_time"]}
 
     elif game_data["phase"] == "judging":
-        if (current_time - phase_start_time).seconds >= 5:
+        if (current_time - phase_start_time).seconds + 1 >= 5:
             next_question_index = game_data["current_question_index"] + 1
             db.collection("Games").document(session_id).update({
                 "phase": "leaderboard",
@@ -281,7 +281,7 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
             return {"status": "leaderboard"}
     
     elif game_data["phase"] == "leaderboard":
-        if (current_time - phase_start_time).seconds >= 5:  # Show leaderboard for 10 seconds
+        if (current_time - phase_start_time).seconds + 1 >= 5:  # Show leaderboard for 10 seconds
             next_question_index = game_data["current_question_index"]
             if next_question_index < len(game_data["questions"]):
                 db.collection("Games").document(session_id).update({
