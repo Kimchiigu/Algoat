@@ -53,6 +53,7 @@ class StartGameRequest(BaseModel):
     room_id: str
     participants: List[str]
     category: str
+    owner: str
     num_questions: int  # Add num_questions field
     answer_time: int  # Add answer_time field
 
@@ -179,7 +180,8 @@ def start_game(request: StartGameRequest):
         "phase": "question",  # Initial phase
         "phase_start_time": datetime.now().isoformat(),
         "participants": participants,
-        "answer_time": request.answer_time,  # Store answer time
+        "answer_time": request.answer_time,  # Store answer time,
+        "owner" : request.owner,
         "num_questions": request.num_questions  # Store number of questions
     })
     # Save participants in a sub-collection
@@ -229,7 +231,7 @@ def submit_answer(session_id: str, answer: Answer):
     db.collection("Games").document(session_id).update({"submitted_answers": current_count})
     
 @app.post("/check_game_state/{session_id}")
-def check_game_state(session_id: str):
+def check_game_state(session_id: str, userId: int):
     game_doc = db.collection("Games").document(session_id).get()
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -251,7 +253,8 @@ def check_game_state(session_id: str):
 
     elif game_data["phase"] == "answer":
         if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
-            calculate_scores(session_id)
+            if(game_data["owner"] == userId):
+                calculate_scores(session_id)
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
                 "phase_start_time": current_time.isoformat()
@@ -315,6 +318,7 @@ def calculate_scores(session_id: str):
             print(f"KeyError: {e} in document: {doc_data}")
         except Exception as e:
             print(f"Unexpected error: {e} in document: {doc_data}")
+    print(answer)
 
     # Use local dataset for scoring
     category_df = df[df['category'] == current_question['category']].copy()
@@ -323,7 +327,7 @@ def calculate_scores(session_id: str):
     for answer in answers:
         best_text, best_score = get_best_score(answer.answer, category_df)
         scores.append(ScoreResponse(player=answer.player, username=answer.username, score=best_score))
-
+    print(scores)
     winner = ''
     if scores:
         winner_score = max(scores, key=lambda x: x.score)

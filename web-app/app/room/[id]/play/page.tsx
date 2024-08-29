@@ -156,6 +156,7 @@ const PlayPage = () => {
               participants: playersList?.map((player) => player.userName),
               category: category,
               num_questions: numQuestions,
+              owner: roomData?.ownerId,
               answer_time: answerTime,
             });
             setStartTime(data?.phase_start_time);
@@ -190,7 +191,9 @@ const PlayPage = () => {
 
     const intervalId = setInterval(async () => {
       try {
-        const { data } = await axios.post(`/check_game_state/${sessionId}`);
+        const { data } = await axios.post(`/check_game_state/${sessionId}`, {
+          player: currentUser?.id,
+        });
         if (data.status === "question") {
           fetchQuestion(sessionId);
           setAnswer("");
