@@ -140,6 +140,7 @@ const PlayPage = () => {
       const category = roomData?.topic;
 
       const numQuestions = roomData?.numQuestions || 5;
+      const ownerId = roomData?.ownerId || "";
       setAnswerTime(roomData?.answerTime || 1);
       console.log(id as string);
       console.log(answerTime);
@@ -156,7 +157,7 @@ const PlayPage = () => {
               participants: playersList?.map((player) => player.userName),
               category: category,
               num_questions: numQuestions,
-              owner: roomData?.ownerId,
+              owner: ownerId,
               answer_time: answerTime,
             });
             setStartTime(data?.phase_start_time);
