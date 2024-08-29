@@ -166,14 +166,12 @@ const PlayPage = () => {
             fetchQuestion(data.session_id);
           }
         } else {
-          setTimeout(() => {
-            fetchSessionId();
-          }, 1000);
+          await new Promise((r) => setTimeout(r, 1000));
+          fetchSessionId();
         }
       }
+      fetchSessionId();
     };
-
-    fetchSessionId();
   }, [id]);
 
   const fetchQuestion = async (session_id: string) => {
@@ -236,7 +234,7 @@ const PlayPage = () => {
       } catch (error) {
         console.error("Error checking game state:", error);
       }
-    }, 1000); // check every 5 seconds
+    }, 1000); // check every 1 seconds
 
     return () => clearInterval(intervalId);
   }, [sessionId]);
@@ -272,7 +270,7 @@ const PlayPage = () => {
     const currentTime = new Date();
     console.log(startTime);
     if (!startTime) return;
-    if (timer >= 0) {
+    if (timer) {
       if (phase === "answer") {
         const timeoutId = setTimeout(() => {
           const newTimer = Math.round(
