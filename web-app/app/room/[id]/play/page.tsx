@@ -192,8 +192,9 @@ const PlayPage = () => {
 
     const intervalId = setInterval(async () => {
       try {
+        console.log(currentUser?.id);
         const { data } = await axios.post(`/check_game_state/${sessionId}`, {
-          player: currentUser?.id,
+          userId: currentUser?.id || "",
         });
         if (data.status === "question") {
           fetchQuestion(sessionId);

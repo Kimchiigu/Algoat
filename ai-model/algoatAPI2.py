@@ -82,6 +82,9 @@ class QuestionRequest(BaseModel):
     question: str
     context: str
 
+class CheckGameStateRequest(BaseModel):
+    userId: str
+
 # Load the dataset
 def load_dataset(base_path):
     data = []
@@ -231,7 +234,8 @@ def submit_answer(session_id: str, answer: Answer):
     db.collection("Games").document(session_id).update({"submitted_answers": current_count})
     
 @app.post("/check_game_state/{session_id}")
-def check_game_state(session_id: str, userId: int):
+def check_game_state(session_id: str, request: CheckGameStateRequest):
+    user_id = request.userId
     game_doc = db.collection("Games").document(session_id).get()
     if not game_doc.exists:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -253,7 +257,7 @@ def check_game_state(session_id: str, userId: int):
 
     elif game_data["phase"] == "answer":
         if (current_time - phase_start_time).seconds >= (game_data["answer_time"]*60):
-            if(game_data["owner"] == userId):
+            if(game_data["owner"] == user_id):
                 calculate_scores(session_id)
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
