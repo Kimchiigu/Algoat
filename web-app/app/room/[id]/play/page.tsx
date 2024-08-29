@@ -75,7 +75,7 @@ const PlayPage = () => {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [question, setQuestion] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string>("");
+  const [answer, setAnswer] = useState<string>(" ");
   const [timer, setTimer] = useState<number>(60);
   const [startTime, setStartTime] = useState<any>();
   const [phase, setPhase] = useState<
@@ -285,6 +285,10 @@ const PlayPage = () => {
     }
   }, [timer, phase]);
 
+  const handleChange = (event: any) => {
+    setAnswer(event.target.value);
+  };
+
   return (
     <div className="relative w-full min-h-screen">
       <Particles
@@ -298,7 +302,7 @@ const PlayPage = () => {
             <h1 className="text-4xl font-bold">
               Round {currentQuestionIndex + 1}
             </h1>
-            <p className="text-xl">{question}</p>
+            <p className="text-xl">{question}?</p>
             <p className="text-sm">Read the question carefully</p>
           </div>
         )}
@@ -318,10 +322,12 @@ const PlayPage = () => {
               <div>Round {currentQuestionIndex + 1}</div>
               <div>Timer: {timer}s</div>
             </div>
-            <p className="text-xl mb-4">{question}</p>
+            <p className="text-xl mb-4">{question}?</p>
             <Textarea
               className="w-full p-2 border rounded h-56"
               placeholder="Type your answer here..."
+              value={answer} // Set the value from state
+              onChange={handleChange}
             ></Textarea>
             {isLock || (
               <Button

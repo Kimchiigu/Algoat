@@ -105,10 +105,19 @@ def load_dataset(base_path):
     return df
 
 def encode_text(text):
+    # Tokenize the input text
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
+    
+    # Pass the inputs through the model to get the embeddings
     with torch.no_grad():
         outputs = model(**inputs)
-    return outputs.last_hidden_state.mean(dim=1).squeeze().numpy().tolist()  # Convert to list
+        print(type(outputs))  # This should print <class 'transformers.modeling_outputs.BaseModelOutputWithPoolingAndCrossAttentions'>
+        print(outputs.keys())
+    
+    # The output is a BaseModelOutputWithPoolingAndCrossAttentions which contains `last_hidden_state`
+    # We take the mean of the `last_hidden_state` across the token dimension to get a single vector for the input text
+    return outputs.last_hidden_state.mean(dim=1).squeeze().numpy().tolist()
+
 
 def encode_context(text):
     return sbert_model.encode(text).tolist()  # Convert to list
@@ -383,14 +392,15 @@ from pydantic import BaseModel
 from transformers import pipeline, BertTokenizerFast, AlbertForQuestionAnswering
 
 # Load the fine-tuned model and tokenizer
-tokenizer = BertTokenizerFast.from_pretrained('Wikidepia/indobert-lite-squad')
-model = AlbertForQuestionAnswering.from_pretrained('Wikidepia/indobert-lite-squad')
+# Initialize the tokenizer and model for the chatbot
+tokenizer_chatbot = BertTokenizerFast.from_pretrained('Wikidepia/indobert-lite-squad')
+model_chatbot = AlbertForQuestionAnswering.from_pretrained('Wikidepia/indobert-lite-squad')
 
-# Create the QA pipeline
+# Create the QA pipeline using the chatbot model and tokenizer
 qa_pipeline = pipeline(
     "question-answering",
-    model=model,
-    tokenizer=tokenizer
+    model=model_chatbot,      # Use model_chatbot instead of model
+    tokenizer=tokenizer_chatbot  # Use tokenizer_chatbot instead of tokenizer
 )
 
 @app.post("/answer/")
