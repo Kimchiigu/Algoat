@@ -176,9 +176,18 @@ const PlayPage = () => {
 
   const fetchQuestion = async (session_id: string) => {
     try {
+      console.log("PPPPPP", session_id);
       const { data } = await axios.get<QuestionResponse>(
-        `/get_question/${session_id}`
+        `/get_question/${session_id}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "1",
+          },
+        }
       );
+
+      console.log("DATAAA: ", data);
+      console.log("Question Here: ", data.question);
       setQuestion(data.question);
     } catch (error) {
       console.error("Error fetching question:", error);
@@ -234,7 +243,7 @@ const PlayPage = () => {
       } catch (error) {
         console.error("Error checking game state:", error);
       }
-    }, 1000); // check every 1 seconds
+    }, 2000); // check every 1 seconds
 
     return () => clearInterval(intervalId);
   }, [sessionId]);
@@ -242,8 +251,15 @@ const PlayPage = () => {
   const fetchLeaderboard = async (session_id: string) => {
     try {
       const { data } = await axios.get<LeaderboardResponse>(
-        `/get_leaderboard/${session_id}`
+        `/get_leaderboard/${session_id}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "1",
+          },
+        }
       );
+
+      console.log(data);
       setLeaderboard(data.leaderboard);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -363,7 +379,7 @@ const PlayPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leaderboard.map((player, index) => (
+                {leaderboard?.map((player, index) => (
                   <TableRow key={index}>
                     <TableCell className="text-lg text-left">
                       {player.player}
