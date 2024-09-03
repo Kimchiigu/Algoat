@@ -253,12 +253,13 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
 
     elif game_data["phase"] == "answer":
         if (current_time - phase_start_time).seconds + 1 >= (game_data["answer_time"] * 60):
-            print("CHECK:", user_id, game_data["owner"], game_data["answer_time"], current_time - phase_start_time)
+            print("CHECK:", user_id, game_data["owner"], game_data["answer_time"], (current_time - phase_start_time).seconds + 1)
             if(game_data["owner"] == user_id and game_data["correction"] == 1):
-                calculate_scores(session_id)
                 db.collection("Games").document(session_id).update({
-                "correction": game_data["correction"] + 1
+                "correction": game_data["correction"] + 1,
+                "current_question_index": game_data["current_question_index"] + 1,
                 })
+                calculate_scores(session_id)
             db.collection("Games").document(session_id).update({
                 "phase": "judging",
                 "phase_start_time": current_time.isoformat()
@@ -349,7 +350,6 @@ def calculate_scores(session_id: str):
 
     # Update the game session in Firestore
     db.collection("Games").document(session_id).update({
-        "current_question_index": current_question_index + 1,
         "scores": game_data["scores"],
         "is_playing": True,
         "winner": winner
