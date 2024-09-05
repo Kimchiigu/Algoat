@@ -139,22 +139,25 @@ export default function RoomPage() {
     ]);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/answer/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: userInput,
-          context: `
+      const response = await fetch(
+        "http://algoatapi3-production.up.railway.app/answer/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: userInput,
+            context: `
             Stack adalah struktur data linear yang mengikuti prinsip Last In, First Out (LIFO), di mana elemen yang terakhir ditambahkan adalah yang pertama dihapus. Struktur ini mirip dengan tumpukan buku di mana buku yang paling atas adalah yang pertama kali diambil. Operasi dasar pada stack meliputi Push, Pop, Peek, dan isEmpty.
 
             Queue adalah struktur data linear yang mengikuti prinsip First In, First Out (FIFO), di mana elemen yang pertama kali ditambahkan adalah yang pertama kali dihapus. Queue dapat diimplementasikan menggunakan array atau linked list, dan sering digunakan dalam berbagai aplikasi seperti manajemen antrean dan pemrosesan antrian printer.
 
             Stack dan Queue adalah dua struktur data fundamental yang sering digunakan dalam pemrograman. Meskipun keduanya memiliki perbedaan mendasar dalam cara data diakses, keduanya sangat berguna dalam berbagai situasi. Implementasi yang tepat dari struktur data ini dapat meningkatkan efisiensi algoritma secara signifikan.
           `,
-        }),
-      });
+          }),
+        }
+      );
       const data = await response.json();
       setChatMessages((prevMessages) => [
         ...prevMessages,

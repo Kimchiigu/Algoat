@@ -169,14 +169,16 @@ function RBTPage() {
     ]);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/answer/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: userInput,
-          context: `
+      const response = await fetch(
+        "http://algoatapi3-production.up.railway.app/answer/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: userInput,
+            context: `
             Red-Black Tree adalah jenis pohon biner yang seimbang yang digunakan untuk memastikan bahwa operasi pencarian, penyisipan, dan penghapusan dapat dilakukan dengan efisien. Pohon ini memiliki beberapa properti penting seperti setiap node memiliki warna merah atau hitam, root selalu berwarna hitam, dan semua node eksternal berwarna hitam. Jika sebuah node berwarna merah, maka kedua anaknya harus berwarna hitam.
 
             Operasi penyisipan dalam Red-Black Tree melibatkan beberapa langkah, termasuk memastikan bahwa pohon tetap seimbang setelah penambahan node baru. Jika terjadi pelanggaran, maka pohon perlu dilakukan rotasi atau recoloring untuk mengembalikan keseimbangan.
@@ -185,8 +187,9 @@ function RBTPage() {
 
             Red-Black Tree banyak digunakan dalam berbagai aplikasi penting seperti pengelolaan indeks dalam basis data, manajemen struktur direktori dalam sistem file, dan implementasi kelas koleksi dalam bahasa pemrograman seperti Java dan C++.
           `,
-        }),
-      });
+          }),
+        }
+      );
       const data = await response.json();
       setChatMessages((prevMessages) => [
         ...prevMessages,

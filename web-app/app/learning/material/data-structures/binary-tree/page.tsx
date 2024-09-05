@@ -175,14 +175,16 @@ function BinaryTreePage() {
     ]);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/answer/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: userInput,
-          context: `
+      const response = await fetch(
+        "http://algoatapi3-production.up.railway.app/answer/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: userInput,
+            context: `
             Binary Tree adalah salah satu struktur data yang paling dasar dan penting dalam ilmu komputer. Struktur ini berbentuk hierarkis, di mana setiap elemen atau node dalam tree memiliki maksimal dua anak yang disebut sebagai anak kiri dan anak kanan. Binary Tree digunakan untuk menyimpan dan mengorganisasi data dengan cara yang memungkinkan akses dan modifikasi data dilakukan secara efisien.
 
             Binary Search Tree (BST) adalah jenis Binary Tree di mana setiap node mengikuti aturan bahwa nilai yang ada di anak kiri lebih kecil dari nilai node itu sendiri, dan nilai di anak kanan lebih besar. BST memberikan cara yang efisien untuk mencari, menyisipkan, dan menghapus data.
@@ -193,8 +195,9 @@ function BinaryTreePage() {
 
             Binary Tree digunakan dalam berbagai aplikasi penting di ilmu komputer, seperti algoritma pencarian, pengurutan, dan struktur data kompleks seperti heap dan trie. Dalam basis data, Binary Tree digunakan untuk mengindeks data, yang memungkinkan akses cepat ke data yang disimpan.
           `,
-        }),
-      });
+          }),
+        }
+      );
       const data = await response.json();
       setChatMessages((prevMessages) => [
         ...prevMessages,

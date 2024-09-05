@@ -185,14 +185,16 @@ function AVLTreePage() {
     ]);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/answer/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: userInput,
-          context: `
+      const response = await fetch(
+        "http://algoatapi3-production.up.railway.app/answer/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: userInput,
+            context: `
             AVL Tree adalah jenis Balanced Binary Tree yang pertama kali diperkenalkan oleh Adelson-Velsky dan Landis pada tahun 1962. AVL Tree adalah salah satu varian dari Binary Search Tree (BST) yang memiliki mekanisme otomatis untuk menjaga keseimbangan tinggi dari pohon biner setelah setiap operasi penyisipan dan penghapusan. Keseimbangan ini dicapai dengan memastikan bahwa perbedaan tinggi antara anak kiri dan anak kanan dari setiap node tidak lebih dari satu.
 
             AVL Tree menggunakan rotasi untuk menjaga keseimbangan pohon. Rotasi ini dapat berupa rotasi tunggal atau ganda, tergantung pada kondisi keseimbangan setelah operasi penyisipan atau penghapusan.
@@ -207,8 +209,9 @@ function AVLTreePage() {
 
             AVL Tree banyak digunakan dalam aplikasi di mana efisiensi dan konsistensi waktu pencarian sangat penting. Beberapa contoh aplikasi dari AVL Tree termasuk sistem basis data, sistem pencarian informasi, aplikasi pengurutan, manajemen memori, dan jaringan komputer.
           `,
-        }),
-      });
+          }),
+        }
+      );
       const data = await response.json();
       setChatMessages((prevMessages) => [
         ...prevMessages,
