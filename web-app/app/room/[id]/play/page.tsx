@@ -294,6 +294,10 @@ const PlayPage = () => {
               (currentTime.getTime() - new Date(startTime).getTime()) / 1000
           );
           setTimer(newTimer);
+
+          console.log("1", currentTime.getTime());
+          console.log("2", new Date(startTime).getTime());
+          console.log("3", newTimer);
         }, 1000);
         return () => clearTimeout(timeoutId);
       }
