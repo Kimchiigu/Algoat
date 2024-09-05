@@ -142,8 +142,6 @@ const PlayPage = () => {
       const numQuestions = roomData?.numQuestions || 5;
       const ownerId = roomData?.ownerId || "";
       setAnswerTime(roomData?.answerTime || 1);
-      console.log(id as string);
-      console.log(answerTime);
       if (roomDoc.exists() && roomDoc.data()?.sessionId) {
         const sessionId = roomDoc.data().sessionId;
         setSessionId(sessionId);
@@ -176,7 +174,6 @@ const PlayPage = () => {
 
   const fetchQuestion = async (session_id: string) => {
     try {
-      console.log("PPPPPP", session_id);
       const { data } = await axios.get<QuestionResponse>(
         `/get_question/${session_id}`,
         {
@@ -186,8 +183,6 @@ const PlayPage = () => {
         }
       );
 
-      console.log("DATAAA: ", data);
-      console.log("Question Here: ", data.question);
       setQuestion(data.question);
     } catch (error) {
       console.error("Error fetching question:", error);
@@ -199,7 +194,6 @@ const PlayPage = () => {
 
     const intervalId = setInterval(async () => {
       try {
-        console.log(currentUser?.id);
         const { data } = await axios.post(`/check_game_state/${sessionId}`, {
           userId: currentUser?.id || "",
         });
@@ -211,16 +205,12 @@ const PlayPage = () => {
           setAnswer("");
           setIsLock(false);
           setPhase("question");
-          console.log("question");
         } else if (data.status === "answer") {
           setPhase("answer");
-          console.log("answer");
         } else if (data.status === "judging") {
           setIsLock(true);
           setPhase("judging");
-          console.log("judging");
         } else if (data.status === "leaderboard") {
-          console.log("leaderboard");
           setPhase("leaderboard");
           setIsLock(false);
           fetchLeaderboard(sessionId);
@@ -259,7 +249,6 @@ const PlayPage = () => {
         }
       );
 
-      console.log(data);
       setLeaderboard(data.leaderboard);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -284,7 +273,6 @@ const PlayPage = () => {
 
   useEffect(() => {
     const currentTime = new Date();
-    console.log(startTime);
     if (!startTime) return;
     if (timer) {
       if (phase === "answer") {
@@ -294,10 +282,6 @@ const PlayPage = () => {
               (currentTime.getTime() - new Date(startTime).getTime()) / 1000
           );
           setTimer(newTimer);
-
-          console.log("1", currentTime.getTime());
-          console.log("2", new Date(startTime).getTime());
-          console.log("3", newTimer);
         }, 1000);
         return () => clearTimeout(timeoutId);
       }

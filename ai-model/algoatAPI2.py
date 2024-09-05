@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, firestore
 import time
-
+#
 # Firebase Admin SDK setup
 cred = credentials.Certificate("firebase-service.json")  # Replace with your Firebase service account key file
 firebase_admin.initialize_app(cred)
@@ -33,8 +33,8 @@ rake = Rake()
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",
-    "https://9019-180-252-170-201.ngrok-free.app",
+    "https://algoat.vercel.app",
+    "https://algoatapi3-production.up.railway.app",
 ]
 
 app.add_middleware(
@@ -250,6 +250,8 @@ def check_game_state(session_id: str, request: CheckGameStateRequest):
                 "phase_start_time": current_time.isoformat()
             })
             return {"status": "answer", "question": game_data["questions"][game_data["current_question_index"]]["question"], "phaseTime": game_data["phase_start_time"]}
+        else:
+            return {"status": "question", "question": game_data["questions"][game_data["current_question_index"]]["question"]}
 
     elif game_data["phase"] == "answer":
         if (current_time - phase_start_time).seconds + 1 >= (game_data["answer_time"] * 60):

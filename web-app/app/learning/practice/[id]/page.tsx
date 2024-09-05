@@ -1,34 +1,56 @@
 "use client";
-
-import { useRouter, useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import router, { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import axios from "@/lib/axiosConfig";
+import { db } from "@/firebase";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  onSnapshot,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+import { useParams } from "next/navigation";
+import { fetchRoomData } from "@/controller/room-controller";
+import useUserStore from "@/lib/user-store";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadStarsPreset } from "tsparticles-preset-stars";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  createRoom,
-  joinRoom,
-  sendMessage,
-  handleRoomLifecycle,
-  leaveRoom,
-  updateRoomSettings,
-  startPlaying,
-} from "@/controller/room-controller";
-import {
-  Select,
-  SelectItem,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import useUserStore from "@/lib/user-store";
-import { onSnapshot, doc } from "firebase/firestore";
-import { db } from "@/firebase";
-import GoBack from "@/components/go-back";
+import { Textarea } from "@/components/ui/textarea";
 import withAuth from "@/hoc/withAuth";
+
+interface QuestionResponse {
+  question: string;
+  phaseTime: any;
+}
+
+interface Answer {
+  player: string;
+  answer: string;
+}
+
+interface ScoreResponse {
+  player: string;
+  score: number;
+}
+
+interface JudgementResponse {
+  question: string;
+  answers: ScoreResponse[];
+  winner: string;
+}
 
 interface RoomData {
   name: string;
@@ -37,7 +59,6 @@ interface RoomData {
   topic: string;
   numQuestions: number;
   answerTime: number;
-  isPlay?: boolean;
 }
 
 interface Player {
@@ -45,74 +66,37 @@ interface Player {
   userId: string;
 }
 
-const tips = [
-  "Break problems into smaller pieces.",
-  "Practice coding every day.",
-  "Read code written by others.",
-  "Work on real projects.",
-  "Learn to use version control systems.",
-  "Understand algorithms and data structures.",
-  "Participate in coding challenges.",
-  "Write clean and readable code.",
-  "Debug your code regularly.",
-  "Keep up with new technologies.",
-  "Document your code.",
-  "Use meaningful variable names.",
-  "Optimize your code for performance.",
-  "Collaborate with other developers.",
-  "Test your code thoroughly.",
-  "Learn multiple programming languages.",
-  "Stay curious and keep learning.",
-  "Read programming books and blogs.",
-  "Follow best practices and coding standards.",
-  "Build a portfolio of your projects.",
-];
+interface LeaderboardResponse {
+  leaderboard: { player: string; score: number }[];
+}
 
-function PracticePage() {
-  const [roomData, setRoomData] = useState<RoomData | null>(null);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
-  const { currentUser } = useUserStore();
-  const router = useRouter();
+const PlayPage = () => {
   const { id } = useParams();
-  const [topic, setTopic] = useState("Algorithm and Data Structure");
-  const [numQuestions, setNumQuestions] = useState(10);
-  const [answerTime, setAnswerTime] = useState(5);
-  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const router = useRouter();
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [question, setQuestion] = useState<string | null>(null);
+  const [answer, setAnswer] = useState<string>(" ");
+  const [timer, setTimer] = useState<number>(60);
+  const [startTime, setStartTime] = useState<any>();
+  const [phase, setPhase] = useState<
+    "question" | "answer" | "judging" | "ended" | "leaderboard"
+  >("question");
+  const [message, setMessage] = useState<string | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [leaderboard, setLeaderboard] = useState<
+    { player: string; score: number }[]
+  >([]);
+  const { currentUser } = useUserStore();
+  const [answerTime, setAnswerTime] = useState(1);
+  const [isLock, setIsLock] = useState(false);
+
+  // Get the room data
+  const [roomData, setRoomData] = useState(null);
+  const [playersList, setPlayersList] = useState<Player[]>([]);
+
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadStarsPreset(engine);
   }, []);
-
-  useEffect(() => {
-    handleRoomLifecycle(
-      id as string,
-      currentUser,
-      setRoomData,
-      setPlayers,
-      setMessages,
-      setTopic,
-      setNumQuestions,
-      setAnswerTime,
-      router
-    );
-
-    const roomDocRef = doc(db, "Rooms", id as string);
-    const unsubscribe = onSnapshot(roomDocRef, (doc) => {
-      const data = doc.data();
-      if (data?.isPlay) {
-        router.push(`/room/${id}/play`);
-      }
-    });
-
-    const tipInterval = setInterval(() => {
-      setCurrentTipIndex((prevIndex) => (prevIndex + 1) % tips.length);
-    }, 10000); // 10 seconds
-
-    return () => {
-      unsubscribe();
-      clearInterval(tipInterval);
-    };
-  }, [id, router, currentUser]);
 
   const particlesOptions = {
     preset: "stars",
@@ -128,127 +112,285 @@ function PracticePage() {
     },
   };
 
-  const handleUpdateSettings = async () => {
+  const fetchData = async () => {
+    // Fetch player list and room data
+    const unsubscribePlayers = await fetchRoomData(
+      id as string,
+      ({ playersList, roomData }) => {
+        setPlayersList(playersList);
+        setRoomData(roomData);
+      }
+    );
+
+    return () => {
+      if (unsubscribePlayers) unsubscribePlayers();
+    };
+  };
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchSessionId = async () => {
+      fetchData();
+      const roomDocRef = doc(db, "Rooms", id as string);
+      const roomDoc = await getDoc(roomDocRef);
+      const playersCollectionRef = collection(roomDocRef, "Players");
+      const playersSnapshot = await getDocs(playersCollectionRef);
+      const playersList = playersSnapshot.docs.map((doc) => doc.data());
+      const roomData = roomDoc.data();
+      const category = roomData?.topic;
+
+      const numQuestions = roomData?.numQuestions || 5;
+      const ownerId = roomData?.ownerId || "";
+      setAnswerTime(roomData?.answerTime || 1);
+      if (roomDoc.exists() && roomDoc.data()?.sessionId) {
+        const sessionId = roomDoc.data().sessionId;
+        setSessionId(sessionId);
+        fetchQuestion(sessionId);
+      } else {
+        // Wait until playersList is set
+        if (roomDoc.data()?.ownerId === currentUser?.id) {
+          if (playersList.length > 0) {
+            const { data } = await axios.post("/start_game", {
+              room_id: id as string,
+              participants: playersList?.map((player) => player.userName),
+              category: category,
+              num_questions: numQuestions,
+              owner: ownerId,
+              answer_time: answerTime,
+            });
+            setStartTime(data?.phase_start_time);
+            setSessionId(data.session_id);
+            await updateDoc(roomDocRef, { sessionId: data.session_id });
+            fetchQuestion(data.session_id);
+          }
+        } else {
+          await new Promise((r) => setTimeout(r, 1010));
+          fetchSessionId();
+        }
+      }
+    };
+    fetchSessionId();
+  }, [id]);
+
+  const fetchQuestion = async (session_id: string) => {
     try {
-      await updateRoomSettings(id as string, {
-        topic,
-        numQuestions,
-        answerTime,
-      });
+      const { data } = await axios.get<QuestionResponse>(
+        `/get_question/${session_id}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "1",
+          },
+        }
+      );
+
+      setQuestion(data.question);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching question:", error);
     }
   };
 
-  const handleStartPlaying = async () => {
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const { data } = await axios.post(`/check_game_state/${sessionId}`, {
+          userId: currentUser?.id || "",
+        });
+        if (phase != data.status) {
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+        if (data.status === "question") {
+          fetchQuestion(sessionId);
+          setAnswer("");
+          setIsLock(false);
+          setPhase("question");
+        } else if (data.status === "answer") {
+          setPhase("answer");
+        } else if (data.status === "judging") {
+          setIsLock(true);
+          setPhase("judging");
+        } else if (data.status === "leaderboard") {
+          setPhase("leaderboard");
+          setIsLock(false);
+          fetchLeaderboard(sessionId);
+        } else if (data.status === "ended") {
+          setPhase("ended");
+          setMessage(`Game Ended`);
+          const timeoutId = setTimeout(() => {
+            router.push(`/room/${id}`);
+          }, 5000);
+          const data = await axios.post(`/end_game/${sessionId}`);
+          return () => clearTimeout(timeoutId);
+        }
+        // Update current question index
+        const gameDoc = await getDoc(doc(db, "Games", sessionId));
+        const gameData = gameDoc.data();
+        setStartTime(gameData?.phase_start_time);
+        if (gameDoc.exists()) {
+          setCurrentQuestionIndex(gameData?.current_question_index || 0);
+        }
+      } catch (error) {
+        console.error("Error checking game state:", error);
+      }
+    }, 2000); // check every 1 seconds
+
+    return () => clearInterval(intervalId);
+  }, [sessionId]);
+
+  const fetchLeaderboard = async (session_id: string) => {
     try {
-      await startPlaying(id as string);
+      const { data } = await axios.get<LeaderboardResponse>(
+        `/get_leaderboard/${session_id}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "1",
+          },
+        }
+      );
+
+      setLeaderboard(data.leaderboard);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching leaderboard:", error);
     }
+  };
+
+  const lockAnswer = async () => {
+    if (!sessionId) return;
+    setIsLock(true);
+    try {
+      await axios.post(`/submit_answer/${sessionId}`, {
+        player: currentUser?.id,
+        username: playersList?.find(
+          (player) => player.userId === currentUser?.id
+        )?.userName,
+        answer: answer,
+      });
+    } catch (error) {
+      console.error("Error locking answer:", error);
+    }
+  };
+
+  useEffect(() => {
+    const currentTime = new Date();
+    if (!startTime) return;
+    if (timer) {
+      if (phase === "answer") {
+        const timeoutId = setTimeout(() => {
+          const newTimer = Math.round(
+            answerTime * 60 -
+              (currentTime.getTime() - new Date(startTime).getTime()) / 1000
+          );
+          setTimer(newTimer);
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [timer, phase]);
+
+  const handleChange = (event: any) => {
+    setAnswer(event.target.value);
   };
 
   return (
     <div className="relative w-full min-h-screen">
-      <GoBack href="/learning"></GoBack>
       <Particles
         id="tsparticles"
         init={particlesInit}
         options={particlesOptions}
       />
-      <div className="flex flex-col w-full min-h-screen relative justify-center items-center">
-        <div className="flex flex-col justify-between z-50 p-4 bg-gray-400/20 backdrop-blur-sm rounded-lg shadow-md w-1/2 border-r border-border">
-          <Card className="bg-gray-700/20 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-primary mb-5">Room Settings</CardTitle>
-              <Select value={topic} onValueChange={(value) => setTopic(value)}>
-                <SelectTrigger>
-                  <SelectValue>{topic}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Algorithm and Data Structure">
-                    Algorithm and Data Structure
-                  </SelectItem>
-                  <SelectItem value="Database">Database</SelectItem>
-                  <SelectItem value="Design Pattern">Design Pattern</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="numQuestions" className="text-primary">
-                  Number of Questions
-                </Label>
-                <Select
-                  value={numQuestions.toString()}
-                  onValueChange={(value) => setNumQuestions(Number(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue>{numQuestions}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[5, 6, 7, 8, 9, 10].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="answerTime" className="text-primary">
-                  Answer Time (in minutes)
-                </Label>
-                <Select
-                  value={answerTime.toString()}
-                  onValueChange={(value) => setAnswerTime(Number(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue>{answerTime}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map((time) => (
-                      <SelectItem key={time} value={time.toString()}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex gap-3 justify-center">
-                <Button
-                  className="bg-primary text-primary-foreground"
-                  onClick={() => handleUpdateSettings()}
-                >
-                  Update Settings
-                </Button>
-                <Button
-                  className="bg-primary text-primary-foreground"
-                  onClick={() => handleStartPlaying()}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-play mr-2"
-                  >
-                    <polygon points="6 3 20 12 6 21 6 3" />
-                  </svg>
-                  Start
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex flex-col w-full relative items-center justify-center h-screen">
+        {phase === "question" && (
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-4xl font-bold">
+              Round {currentQuestionIndex + 1}
+            </h1>
+            <p className="text-xl">{question}?</p>
+            <p className="text-sm">Read the question carefully</p>
+          </div>
+        )}
+
+        {phase === "answer" && (
+          <div
+            className="text-center w-full max-w-2xl p-4"
+            style={{
+              backdropFilter: "blur(1px)",
+              backgroundColor: "rgba(255, 255, 255, 0.25)",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              borderRadius: "16px",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+            }}
+          >
+            <div className="flex justify-between">
+              <div>Round {currentQuestionIndex + 1}</div>
+              <div>Timer: {timer}s</div>
+            </div>
+            <p className="text-xl mb-4">{question}?</p>
+            <Textarea
+              className="w-full p-2 border rounded h-56"
+              placeholder="Type your answer here..."
+              value={answer} // Set the value from state
+              onChange={handleChange}
+              disabled={isLock}
+            ></Textarea>
+            {isLock || (
+              <Button
+                className="mt-4 bg-primary text-primary-foreground"
+                onClick={lockAnswer}
+              >
+                Lock Answer
+              </Button>
+            )}
+          </div>
+        )}
+
+        {phase === "judging" && (
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-4xl font-bold">Judging...</h1>
+            <p className="text-xl">Algoat is Judging...</p>
+            <p>{message}</p>
+          </div>
+        )}
+
+        {phase === "leaderboard" && (
+          <div className="text-center">
+            <h1 className="text-4xl font-bold">Leaderboard</h1>
+            <Table className="bg-gray-300/20 backdrop-blur-sm rounded-lg">
+              <TableHeader className="">
+                <TableRow>
+                  <TableHead className="text-xl text-left px-32">
+                    Player
+                  </TableHead>
+                  <TableHead className="text-xl text-left px-12">
+                    Score
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {leaderboard?.map((player, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="text-lg text-left">
+                      {player.player}
+                    </TableCell>
+                    <TableCell className="text-lg text-left">
+                      {player.score}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {phase === "ended" && (
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-4xl font-bold">Game Over</h1>
+            <p className="text-xl">{message}</p>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
-export default withAuth(PracticePage, true);
+export default withAuth(PlayPage, true);
